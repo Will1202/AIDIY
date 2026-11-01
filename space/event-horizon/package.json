@@ -1,0 +1,31 @@
+{
+  "name": "event-horizon",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "EVENT HORIZON — What if a black hole could consume the internet? An interactive cinematic black hole that devours the web page it lives on.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "gsap": "^3.15.0",
+    "html-to-image": "^1.11.13",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "~0.187.0",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "~0.187.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5"
+  }
+}

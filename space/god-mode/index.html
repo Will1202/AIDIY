@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="GOD MODE — CONTROL THE UNIVERSE. Create, collapse and detonate a real-time GPU particle universe with your hands." />
+    <title>GOD MODE — Control the Universe</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23000'/%3E%3Ccircle cx='32' cy='32' r='9' fill='%23000' stroke='%23e8c88f' stroke-width='3'/%3E%3Cellipse cx='32' cy='32' rx='27' ry='7' fill='none' stroke='%23e8c88f' stroke-opacity='.6' stroke-width='2'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <canvas id="gl" aria-label="Interactive particle universe"></canvas>
+
+    <div id="ui" class="ui">
+      <header class="brand">
+        <h1 class="title">GOD MODE</h1>
+        <p class="tagline">THE UNIVERSE IS IN YOUR HANDS</p>
+      </header>
+
+      <nav class="controls" aria-label="Settings">
+        <button id="btn-sound" class="ctl" type="button" aria-pressed="false"><i></i><span>SOUND</span><em>OFF</em></button>
+        <button id="btn-camera" class="ctl" type="button" aria-pressed="false"><i></i><span>CAMERA</span><em>OFF</em></button>
+        <button id="btn-quality" class="ctl" type="button"><i></i><span>QUALITY</span><em>AUTO</em></button>
+      </nav>
+
+      <aside id="cam" class="cam" aria-hidden="true">
+        <video id="cam-video" playsinline muted></video>
+        <canvas id="cam-overlay"></canvas>
+        <div id="cam-state" class="cam-state">NO HAND</div>
+      </aside>
+
+      <div id="telemetry" class="telemetry"></div>
+
+      <div id="hint" class="hint">
+        <span><b>MOVE</b> DISTURB</span>
+        <span><b>HOLD</b> VORTEX</span>
+        <span><b>SPACE</b> COLLAPSE · RELEASE TO DETONATE</span>
+        <span><b>← →</b> TRANSFORM</span>
+        <span class="touch-only"><b>TWO FINGERS</b> COLLAPSE · <b>FLICK</b> TRANSFORM</span>
+      </div>
+
+      <footer class="forms" id="forms">
+        <button class="arrow" id="prev" type="button" aria-label="Previous form">‹</button>
+        <ol id="form-list"></ol>
+        <button class="arrow" id="next" type="button" aria-label="Next form">›</button>
+      </footer>
+
+      <button id="hold" class="hold" type="button" aria-label="Hold to collapse, release to detonate">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle class="track" cx="32" cy="32" r="28" />
+          <circle class="charge" cx="32" cy="32" r="28" />
+          <circle class="core" cx="32" cy="32" r="6" />
+        </svg>
+        <span id="hold-label">HOLD</span>
+      </button>
+    </div>
+
+    <div id="chapter" class="chapter" aria-live="polite"></div>
+    <div id="reticle" class="reticle" aria-hidden="true">
+      <svg viewBox="0 0 64 64">
+        <circle class="r-ring" cx="32" cy="32" r="20" />
+        <circle class="r-charge" cx="32" cy="32" r="26" />
+        <circle class="r-dot" cx="32" cy="32" r="1.4" />
+      </svg>
+      <span class="r-label"></span>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="lite" class="lite"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

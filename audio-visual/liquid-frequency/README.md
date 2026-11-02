@@ -1,3 +1,7 @@
+<sub><a href="../../README.md">← AIDIY</a></sub>
+
+<img src="../../.github/assets/cover-liquid-frequency.jpg" alt="liquid-frequency" width="100%">
+
 # LIQUID FREQUENCY — MAKE SOUND VISIBLE
 
 > SOUND BECOMES MATTER.
@@ -8,7 +12,7 @@
 
 ## 启动
 
-需要 Node.js 18+（已在 Node 24 上验证）。
+需要 Node.js 20.19+（Vite 8 的最低要求，已在 Node 24 上验证）。
 
 ```bash
 cd audio-visual/liquid-frequency

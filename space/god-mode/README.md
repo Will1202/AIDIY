@@ -1,3 +1,7 @@
+<sub><a href="../../README.md">← AIDIY</a></sub>
+
+<img src="../../.github/assets/cover-god-mode.jpg" alt="god-mode" width="100%">
+
 # GOD MODE — CONTROL THE UNIVERSE
 
 A real-time GPU particle universe you create, collapse into a black hole, detonate and reshape with your mouse, keyboard, touch, or bare hands (webcam + MediaPipe).

@@ -1,3 +1,7 @@
+<sub><a href="../../README.md">← AIDIY</a></sub>
+
+<img src="../../.github/assets/cover-event-horizon.jpg" alt="event-horizon" width="100%">
+
 # EVENT HORIZON — WHAT IF A BLACK HOLE COULD CONSUME THE INTERNET?
 
 一个会把自己所在的网页吞掉的黑洞。打开时是一个精致的未来主义"深空观测站"网站;点击 **DESTROY REALITY**,真实的 DOM 元素会被引力拉扯、潮汐撕裂、螺旋坠入吸积盘;随后镜头冲过事件视界,穿过时空隧道,进入另一个宇宙。整段约 26 秒,可反复重建与重播。

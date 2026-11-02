@@ -1,3 +1,7 @@
+<sub><a href="../../README.md">← AIDIY</a></sub>
+
+<img src="../../.github/assets/cover-break-the-screen.jpg" alt="break-the-screen" width="100%">
+
 # BREAK THE SCREEN — REALITY HAS NO BOUNDARIES
 
 > 如果你的屏幕是一扇通往另一个维度的窗户呢？

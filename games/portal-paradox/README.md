@@ -1,3 +1,7 @@
+<sub><a href="../../README.md">← AIDIY</a></sub>
+
+<img src="../../.github/assets/cover-portal-paradox.jpg" alt="portal-paradox" width="100%">
+
 # PORTAL PARADOX — REALITY IS BROKEN
 
 **What if space was just an illusion?**

@@ -10,6 +10,7 @@
 | 🌌 宇宙与物理 | [GOD MODE](space/god-mode) | 用手势创造、坍缩、引爆一个 GPU 粒子宇宙 | 鼠标 / 触屏 / 摄像头手势 | 5173 |
 | 🎵 声音可视化 | [LIQUID FREQUENCY](audio-visual/liquid-frequency) | 被音乐实时驱动的液态铬金属雕塑 | 上传音乐 / 内置 DEMO | 5178 |
 | 🎮 游戏与交互世界 | [PORTAL PARADOX](games/portal-paradox) | 两扇实时连通的传送门：穿越世界、无限递归、重力反转、时间倒流 | 键盘鼠标第一人称 / 触屏 | 5184 |
+| 🖐 体感与混合现实 | [BREAK THE SCREEN](mixed-reality/break-the-screen) | 屏幕变成一扇窗：头动透视跟着变，伸手把能量核心拉出屏幕，把玻璃顶碎 | 摄像头手势 + 头部追踪 / 鼠标键盘 | 5187 |
 
 ## 仓库结构
 
@@ -22,6 +23,8 @@ AIDIY/
 │   └── liquid-frequency/     音乐驱动的液态金属
 ├── games/                    可以走进去玩的 3D 世界
 │   └── portal-paradox/       实时传送门 + 物理实验室
+├── mixed-reality/            摄像头体感、头部追踪、混合现实错觉
+│   └── break-the-screen/     头部追踪窗口 + 手势物理 + 打碎屏幕
 └── .claude/launch.json       Claude 桌面版预览用的启动配置
 ```
 
@@ -108,6 +111,28 @@ AIDIY/
 
 ---
 
+## 🖐 mixed-reality/ · 体感与混合现实
+
+### BREAK THE SCREEN：现实没有边界
+
+📁 [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen)
+
+**它是干嘛的**：屏幕变成一扇通往"维度实验室"的窗户。打开摄像头后，网页实时追踪你的头和手：头往左移，就能看到窗里原本被挡住的右侧；凑近屏幕，视野变宽。对着摄像头捏合手指能抓住里面的能量核心和金属物体，拖动、甩出去；把核心往自己这边拉，它会顶在屏幕玻璃上，玻璃鼓起、裂纹像蜘蛛网一样蔓延，然后整块碎掉，碎片和整个实验室的东西从窗口冲出来。挥手改变重力，双手在空中捏合能创造星球、液态金属、粒子星系、机械立方体，拍手让一切飞回原位。按 `D` 播放一段 30 秒、可以直接录抖音的自动演示。
+
+**亮点**
+- 真正的视点相关透视：按眼睛位置实时计算非对称视锥（Off-Axis Projection），屏幕平面零视差，越远的东西视差越大，不是旋转场景。
+- 手势 → 拾取射线 → 深度（手掌大小）→ 物理弹簧：抓取有重量感，松手按手速抛出；双手缩放、旋转。
+- 碎片就是你看着蔓延的那些裂纹：Voronoi 蜘蛛网裂纹 → 每一块都是真实的凸包刚体玻璃。
+- MediaPipe 人脸 + 手部识别跑在 Web Worker 里（GPU），不卡渲染；画面只在本机分析，不上传。
+- Rapier 物理、四档画质 + 动态分辨率、全部音效 Web Audio 实时合成；没有摄像头时鼠标可以体验全部效果。
+- 还没有用真实摄像头测试过（开发环境没有摄像头），README 里写了测过和没测过的部分。
+
+**常用按键**：鼠标拖拽抓取 · 滚轮拉出屏幕 · 右键冲击波 · `Alt`+鼠标 模拟头部 · `G` 重力 · `B` 击碎 · `R` 复原 · `C` 创造 · `D` 演示 · `H` 隐藏界面
+
+**技术栈**：React 19（UI）· TypeScript · Vite · Three.js（原生引擎 + 后期）· Rapier 物理 · MediaPipe Tasks Vision · zustand
+
+---
+
 ## 拉到本地运行
 
 需要 [Node.js](https://nodejs.org/) 18+、git，以及已登录的 [GitHub CLI](https://cli.github.com/)（仓库是私有的）。推荐用桌面版 Chrome 或 Edge 打开，需要支持 WebGL2。
@@ -137,7 +162,7 @@ git sparse-checkout set audio-visual/liquid-frequency
 
 ## 加一个新项目
 
-1. 选一个分类文件夹放进去。没有合适的就新建一个，比如 `generative-art/`（生成艺术）、`gesture/`（体感交互）、`shader-art/`、`tools/`。
+1. 选一个分类文件夹放进去。没有合适的就新建一个，比如 `generative-art/`（生成艺术）、`shader-art/`、`tools/`。
 2. 在分类下建项目文件夹，带上它自己的 `package.json` 和 `README.md`。
 3. 在本文件的「目录」表格和对应分类下各加一段介绍。
 4. 要用 Claude 桌面版预览的话，在 `.claude/launch.json` 加一条，用 `npm --prefix <分类>/<项目> run dev`。

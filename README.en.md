@@ -66,7 +66,8 @@ Two truly connected portals, in a lab where gravity flips and time runs backward
 <a href="mixed-reality/break-the-screen"><img src=".github/assets/cover-break-the-screen.jpg" alt="BREAK THE SCREEN"></a>
 <sub>05 · MIXED REALITY</sub><br>
 <b>BREAK THE SCREEN</b><br>
-Your screen becomes a window. Reach in and shatter the glass from the inside.
+Your screen becomes a window. Reach in and shatter the glass from the inside.<br>
+<sub><a href="https://will1202.github.io/AIDIY/break-the-screen/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="Next experiment in progress">
@@ -145,7 +146,7 @@ Walk into a 120-metre brutalist concrete research hall in first person. The port
 
 ### 05 — BREAK THE SCREEN
 
-**Reality has no boundaries.** &nbsp;<sub>[`mixed-reality/break-the-screen`](mixed-reality/break-the-screen)</sub>
+**Reality has no boundaries.** &nbsp;<sub>[`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) · [▶ Try it live](https://will1202.github.io/AIDIY/break-the-screen/)</sub>
 
 <img src=".github/assets/strip-break-the-screen.jpg" alt="BREAK THE SCREEN storyboard" width="100%">
 

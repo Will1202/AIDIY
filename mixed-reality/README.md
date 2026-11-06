@@ -7,7 +7,7 @@
 <a href="break-the-screen"><img src="../.github/assets/cover-break-the-screen.jpg" alt="BREAK THE SCREEN" width="100%"></a>
 
 **BREAK THE SCREEN**：屏幕变成一扇通往实验室的窗。头一动，透视就跟着变；伸手抓住能量核心把它拉出来，屏幕玻璃被顶裂、碎掉，整个实验室从窗口冲出，再一拍手全部复原。<br>
-<sub>摄像头手势 + 头部追踪 / 鼠标键盘 · 按 <kbd>D</kbd> 播放 30 秒演示 · <code>localhost:5187</code></sub>
+<sub>摄像头手势 + 头部追踪 / 鼠标键盘 · 按 <kbd>D</kbd> 播放 30 秒演示 · <code>localhost:5187</code> · <a href="https://will1202.github.io/AIDIY/break-the-screen/">▶ 在线体验</a></sub>
 
 ```bash
 cd mixed-reality/<作品目录>

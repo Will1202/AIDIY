@@ -21,6 +21,10 @@
 
 ## 运行
 
+**在线体验**：<https://will1202.github.io/AIDIY/break-the-screen/>（不用安装，打开就能玩；用摄像头时浏览器会先询问权限）
+
+本地运行：
+
 ```bash
 cd mixed-reality/break-the-screen
 npm install

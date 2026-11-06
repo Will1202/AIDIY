@@ -66,7 +66,8 @@
 <a href="mixed-reality/break-the-screen"><img src=".github/assets/cover-break-the-screen.jpg" alt="BREAK THE SCREEN"></a>
 <sub>05 · MIXED REALITY · 体感与混合现实</sub><br>
 <b>BREAK THE SCREEN</b><br>
-屏幕变成一扇窗，伸手进去，把玻璃从里面打碎。
+屏幕变成一扇窗，伸手进去，把玻璃从里面打碎。<br>
+<sub><a href="https://will1202.github.io/AIDIY/break-the-screen/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="下一个实验制作中">
@@ -145,7 +146,7 @@
 
 ### 05 — BREAK THE SCREEN
 
-**现实没有边界。** &nbsp;<sub>[`mixed-reality/break-the-screen`](mixed-reality/break-the-screen)</sub>
+**现实没有边界。** &nbsp;<sub>[`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) · [▶ 在线体验](https://will1202.github.io/AIDIY/break-the-screen/)</sub>
 
 <img src=".github/assets/strip-break-the-screen.jpg" alt="BREAK THE SCREEN 演示分镜" width="100%">
 

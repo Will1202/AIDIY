@@ -3,17 +3,155 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="0; url=./break-the-screen/" />
-    <title>AIDIY</title>
+    <title>AIDIY · 在浏览器里实时运行的视觉实验</title>
+    <meta name="description" content="黑洞、传送门、液态金属，还有一块会被打碎的屏幕。五个实时运行在浏览器里的 WebGL 作品，打开就能玩。" />
+    <meta property="og:title" content="AIDIY · 在浏览器里实时运行的视觉实验" />
+    <meta property="og:description" content="黑洞、传送门、液态金属，还有一块会被打碎的屏幕。打开就能玩。" />
+    <meta property="og:image" content="https://will1202.github.io/AIDIY/assets/banner.jpg" />
+    <meta name="theme-color" content="#050507" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23050507'/%3E%3Ccircle cx='32' cy='32' r='10' fill='none' stroke='%23f4f5f7' stroke-width='3'/%3E%3Cellipse cx='32' cy='32' rx='26' ry='8' fill='none' stroke='%23f4f5f7' stroke-opacity='.55' stroke-width='2'/%3E%3C/svg%3E" />
     <style>
-      html, body { margin: 0; height: 100%; background: #000; color: #cfe4ff; font: 13px/1.6 ui-monospace, Menlo, monospace; letter-spacing: 0.12em; }
-      body { display: grid; place-content: center; text-align: center; gap: 10px; }
-      a { color: #a9dcff; }
+      :root {
+        --bg: #050507;
+        --panel: #0c0d12;
+        --line: rgba(255, 255, 255, 0.09);
+        --text: #eef0f4;
+        --dim: #8b93a1;
+        --faint: #5c6370;
+        --accent: #f4f5f7;
+        --sans: "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+        --mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html { background: var(--bg); color-scheme: dark; }
+      body { min-height: 100vh; background: var(--bg); color: var(--text); font: 15px/1.7 var(--sans); -webkit-font-smoothing: antialiased; }
+      a { color: inherit; text-decoration: none; }
+      .wrap { max-width: 1160px; margin: 0 auto; padding: 0 28px; }
+
+      header { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+      .hero-bg { position: absolute; inset: 0; background: url(assets/banner.jpg) right center / cover no-repeat; opacity: 0.55; }
+      .hero-bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 30%, rgba(5, 5, 7, 0.55) 60%, rgba(5, 5, 7, 0.2) 100%), linear-gradient(0deg, var(--bg) 0%, rgba(5, 5, 7, 0) 40%); }
+      .hero { position: relative; padding-top: 96px; padding-bottom: 72px; }
+      .kicker { font: 12px/1 var(--mono); letter-spacing: 0.3em; color: var(--dim); }
+      .kicker b { color: var(--text); font-weight: 400; }
+      h1 { margin-top: 22px; font: 800 clamp(64px, 11vw, 128px)/0.9 var(--sans); letter-spacing: -0.035em; }
+      h1 span { font-weight: 200; color: #c3c8d2; }
+      .lead { margin-top: 26px; max-width: 560px; font-size: 18px; color: #d9dce2; }
+      .lead small { display: block; margin-top: 6px; font-size: 14px; color: var(--dim); }
+      .meta { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px 18px; font: 12px/1 var(--mono); letter-spacing: 0.18em; color: var(--faint); }
+
+      main.wrap { padding-top: 56px; padding-bottom: 24px; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+      .card { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; transition: border-color 0.2s, transform 0.2s; }
+      .card:hover, .card:focus-visible { border-color: rgba(255, 255, 255, 0.32); transform: translateY(-2px); outline: none; }
+      .shot { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #000; }
+      .shot img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s; }
+      .card:hover .shot img { transform: scale(1.03); }
+      .play { position: absolute; right: 14px; bottom: 14px; padding: 8px 14px; border-radius: 999px; background: rgba(5, 5, 7, 0.72); border: 1px solid rgba(255, 255, 255, 0.24); font: 12px/1 var(--mono); letter-spacing: 0.16em; color: #fff; backdrop-filter: blur(6px); }
+      .body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+      .tag { font: 11px/1 var(--mono); letter-spacing: 0.22em; color: var(--faint); }
+      .card h2 { font: 700 20px/1.3 var(--sans); letter-spacing: 0.04em; }
+      .card p { color: #d0d4db; }
+      .card .en { font-size: 13px; color: var(--dim); }
+      .how { margin-top: auto; padding-top: 10px; font-size: 13px; color: var(--dim); }
+      kbd { display: inline-block; min-width: 1.6em; padding: 0 5px; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 4px; font: 12px/1.5 var(--mono); text-align: center; color: var(--text); }
+      .next { display: flex; flex-direction: column; justify-content: center; min-height: 100%; padding: 32px; border: 1px dashed rgba(255, 255, 255, 0.16); border-radius: 10px; color: var(--faint); }
+      .next b { font: 800 34px/1 var(--sans); color: #c3c8d2; letter-spacing: -0.02em; }
+      .next span { margin-top: 12px; font: 12px/1.6 var(--mono); letter-spacing: 0.2em; }
+
+      .notes { margin-top: 40px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; color: var(--dim); }
+      footer.wrap { padding-top: 36px; padding-bottom: 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font: 12px/1.6 var(--mono); letter-spacing: 0.14em; color: var(--faint); }
+      footer a { color: var(--dim); border-bottom: 1px solid rgba(255, 255, 255, 0.2); }
+
+      @media (max-width: 760px) {
+        .wrap { padding: 0 16px; }
+        .hero { padding-top: 64px; padding-bottom: 48px; }
+        .grid { grid-template-columns: 1fr; }
+        .hero-bg { background-position: 70% center; opacity: 0.35; }
+      }
     </style>
   </head>
   <body>
-    <div>AIDIY</div>
-    <a href="./break-the-screen/">BREAK THE SCREEN →</a>
-    <a href="https://github.com/Will1202/AIDIY">GitHub</a>
+    <header>
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="wrap hero">
+        <div class="kicker"><b>REAL-TIME</b> · BROWSER-NATIVE · WEBGL2</div>
+        <h1>AI<span>DIY</span></h1>
+        <p class="lead">
+          在浏览器里实时运行的视觉实验。黑洞、传送门、液态金属，还有一块会被打碎的屏幕。每一帧都由 GPU 当场计算，点开就能玩。
+          <small>Visual experiments that run live in your browser. No install, no video, no server.</small>
+        </p>
+        <div class="meta"><span>05 EXPERIMENTS</span><span>THREE.JS · GLSL · WEB AUDIO</span></div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div class="grid">
+        <a class="card" href="./event-horizon/">
+          <div class="shot"><img src="assets/cover-event-horizon.jpg" alt="EVENT HORIZON" loading="lazy" /><span class="play">▶ 进入体验</span></div>
+          <div class="body">
+            <span class="tag">01 · SPACE · 宇宙与物理</span>
+            <h2>EVENT HORIZON</h2>
+            <p>一个会把自己所在网页吞掉的黑洞。</p>
+            <p class="en">A black hole that devours the web page it lives on.</p>
+            <p class="how">鼠标 / 键盘 · 按 <kbd>D</kbd> 播放 30 秒演示</p>
+          </div>
+        </a>
+        <a class="card" href="./god-mode/">
+          <div class="shot"><img src="assets/cover-god-mode.jpg" alt="GOD MODE" loading="lazy" /><span class="play">▶ 进入体验</span></div>
+          <div class="body">
+            <span class="tag">02 · SPACE · 宇宙与物理</span>
+            <h2>GOD MODE</h2>
+            <p>用双手创造、坍缩、引爆一个 26 万颗粒子的宇宙。</p>
+            <p class="en">Create, collapse and detonate a particle universe with your hands.</p>
+            <p class="how">鼠标 / 触屏 / 摄像头手势 · 按 <kbd>R</kbd> 从大爆炸重播</p>
+          </div>
+        </a>
+        <a class="card" href="./liquid-frequency/">
+          <div class="shot"><img src="assets/cover-liquid-frequency.jpg" alt="LIQUID FREQUENCY" loading="lazy" /><span class="play">▶ 进入体验</span></div>
+          <div class="body">
+            <span class="tag">03 · AUDIO-VISUAL · 声音可视化</span>
+            <h2>LIQUID FREQUENCY</h2>
+            <p>被音乐实时驱动的液态铬金属雕塑。</p>
+            <p class="en">A liquid chrome sculpture played by music in real time.</p>
+            <p class="how">拖入音乐，或直接看原创 DEMO（有声音） · <kbd>1</kbd>–<kbd>4</kbd> 切换形态</p>
+          </div>
+        </a>
+        <a class="card" href="./portal-paradox/">
+          <div class="shot"><img src="assets/cover-portal-paradox.jpg" alt="PORTAL PARADOX" loading="lazy" /><span class="play">▶ 进入体验</span></div>
+          <div class="body">
+            <span class="tag">04 · GAMES · 交互世界</span>
+            <h2>PORTAL PARADOX</h2>
+            <p>两扇真正连通的传送门，和一座可以重力反转、时间倒流的实验室。</p>
+            <p class="en">Two truly connected portals in a lab where gravity flips and time runs backwards.</p>
+            <p class="how">键盘鼠标第一人称 · 按 <kbd>C</kbd> 播放 30 秒演示</p>
+          </div>
+        </a>
+        <a class="card" href="./break-the-screen/">
+          <div class="shot"><img src="assets/cover-break-the-screen.jpg" alt="BREAK THE SCREEN" loading="lazy" /><span class="play">▶ 进入体验</span></div>
+          <div class="body">
+            <span class="tag">05 · MIXED REALITY · 体感与混合现实</span>
+            <h2>BREAK THE SCREEN</h2>
+            <p>屏幕变成一扇窗，伸手进去，把玻璃从里面打碎。</p>
+            <p class="en">Your screen becomes a window. Reach in and shatter the glass.</p>
+            <p class="how">摄像头手势 + 头部追踪，或鼠标拖拽 · 按 <kbd>D</kbd> 播放 30 秒演示</p>
+          </div>
+        </a>
+        <div class="next" aria-label="下一个实验制作中">
+          <b>06 · NEXT</b>
+          <span>下一个实验 · 制作中<br />NEXT EXPERIMENT · IN THE LAB</span>
+        </div>
+      </div>
+
+      <p class="notes">
+        建议用桌面版 Chrome 或 Edge 打开（需要 WebGL2），部分作品有声音。用到摄像头的作品会先征得你的同意，画面只在本机处理，不会上传。<br />
+        Best in desktop Chrome or Edge with WebGL2. Camera input is optional and never leaves your device.
+      </p>
+    </main>
+
+    <footer class="wrap">
+      <span>© 2026 WILL1202 · 与 AI 协作创作</span>
+      <span><a href="https://github.com/Will1202/AIDIY">源码 · SOURCE ON GITHUB</a></span>
+    </footer>
   </body>
 </html>

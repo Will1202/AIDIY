@@ -24,7 +24,7 @@
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0b0c10?style=for-the-badge&logo=mediapipe&logoColor=white)
 ![Web Audio](https://img.shields.io/badge/Web_Audio-0b0c10?style=for-the-badge)
 
-[作品](#作品) &nbsp;·&nbsp; [技术亮点](#技术亮点) &nbsp;·&nbsp; [创作原则](#创作原则) &nbsp;·&nbsp; [快速开始](#快速开始)
+[作品](#作品) &nbsp;·&nbsp; [技术亮点](#技术亮点) &nbsp;·&nbsp; [创作原则](#创作原则) &nbsp;·&nbsp; [快速开始](#快速开始) &nbsp;·&nbsp; [**▶ 在线体验**](https://will1202.github.io/AIDIY/)
 
 </div>
 
@@ -38,13 +38,15 @@
 <a href="space/event-horizon"><img src=".github/assets/cover-event-horizon.jpg" alt="EVENT HORIZON"></a>
 <sub>01 · SPACE · 宇宙与物理</sub><br>
 <b>EVENT HORIZON</b><br>
-一个会把自己所在网页吞掉的黑洞。
+一个会把自己所在网页吞掉的黑洞。<br>
+<sub><a href="https://will1202.github.io/AIDIY/event-horizon/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
 <a href="space/god-mode"><img src=".github/assets/cover-god-mode.jpg" alt="GOD MODE"></a>
 <sub>02 · SPACE · 宇宙与物理</sub><br>
 <b>GOD MODE</b><br>
-用双手创造、坍缩、引爆一个 26 万颗粒子的宇宙。
+用双手创造、坍缩、引爆一个 26 万颗粒子的宇宙。<br>
+<sub><a href="https://will1202.github.io/AIDIY/god-mode/">▶ 在线体验</a></sub>
 </td>
 </tr>
 <tr>
@@ -52,13 +54,15 @@
 <a href="audio-visual/liquid-frequency"><img src=".github/assets/cover-liquid-frequency.jpg" alt="LIQUID FREQUENCY"></a>
 <sub>03 · AUDIO-VISUAL · 声音可视化</sub><br>
 <b>LIQUID FREQUENCY</b><br>
-被音乐实时驱动的液态铬金属雕塑。
+被音乐实时驱动的液态铬金属雕塑。<br>
+<sub><a href="https://will1202.github.io/AIDIY/liquid-frequency/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
 <a href="games/portal-paradox"><img src=".github/assets/cover-portal-paradox.jpg" alt="PORTAL PARADOX"></a>
 <sub>04 · GAMES · 交互世界</sub><br>
 <b>PORTAL PARADOX</b><br>
-两扇真正连通的传送门，和一座可以重力反转、时间倒流的实验室。
+两扇真正连通的传送门，和一座可以重力反转、时间倒流的实验室。<br>
+<sub><a href="https://will1202.github.io/AIDIY/portal-paradox/">▶ 在线体验</a></sub>
 </td>
 </tr>
 <tr>
@@ -82,7 +86,7 @@
 
 ### 01 — EVENT HORIZON
 
-**如果黑洞能吞掉互联网？** &nbsp;<sub>[`space/event-horizon`](space/event-horizon)</sub>
+**如果黑洞能吞掉互联网？** &nbsp;<sub>[`space/event-horizon`](space/event-horizon) · [▶ 在线体验](https://will1202.github.io/AIDIY/event-horizon/)</sub>
 
 <img src=".github/assets/strip-event-horizon.jpg" alt="EVENT HORIZON 演示分镜" width="100%">
 
@@ -98,7 +102,7 @@
 
 ### 02 — GOD MODE
 
-**用双手控制宇宙。** &nbsp;<sub>[`space/god-mode`](space/god-mode)</sub>
+**用双手控制宇宙。** &nbsp;<sub>[`space/god-mode`](space/god-mode) · [▶ 在线体验](https://will1202.github.io/AIDIY/god-mode/)</sub>
 
 <img src=".github/assets/strip-god-mode.jpg" alt="GOD MODE 演示分镜" width="100%">
 
@@ -114,7 +118,7 @@
 
 ### 03 — LIQUID FREQUENCY
 
-**让声音变成物质。** &nbsp;<sub>[`audio-visual/liquid-frequency`](audio-visual/liquid-frequency)</sub>
+**让声音变成物质。** &nbsp;<sub>[`audio-visual/liquid-frequency`](audio-visual/liquid-frequency) · [▶ 在线体验](https://will1202.github.io/AIDIY/liquid-frequency/)</sub>
 
 <img src=".github/assets/strip-liquid-frequency.jpg" alt="LIQUID FREQUENCY 演示分镜" width="100%">
 
@@ -130,7 +134,7 @@
 
 ### 04 — PORTAL PARADOX
 
-**如果空间只是一种错觉？** &nbsp;<sub>[`games/portal-paradox`](games/portal-paradox)</sub>
+**如果空间只是一种错觉？** &nbsp;<sub>[`games/portal-paradox`](games/portal-paradox) · [▶ 在线体验](https://will1202.github.io/AIDIY/portal-paradox/)</sub>
 
 <img src=".github/assets/strip-portal-paradox.jpg" alt="PORTAL PARADOX 演示分镜" width="100%">
 
@@ -202,6 +206,8 @@
 </table>
 
 ## 快速开始
+
+不想安装的话，所有作品都可以直接在线体验：<https://will1202.github.io/AIDIY/>
 
 需要 [Node.js](https://nodejs.org/) 20.19 及以上版本，以及支持 WebGL2 的桌面浏览器（推荐 Chrome 或 Edge）。摄像头是可选的。
 

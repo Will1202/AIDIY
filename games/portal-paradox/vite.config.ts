@@ -30,6 +30,8 @@ function shots(): Plugin {
 }
 
 export default defineConfig({
+  // relative asset URLs so the build also runs under a sub-path (GitHub Pages)
+  base: './',
   plugins: [react(), shots()],
   server: { port: 5184 },
   build: {

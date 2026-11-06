@@ -8,6 +8,10 @@ A real-time GPU particle universe you create, collapse into a black hole, detona
 
 ## Run
 
+**Try it live**: <https://will1202.github.io/AIDIY/god-mode/> (no install needed; the browser asks before it uses the camera)
+
+Run locally:
+
 ```bash
 cd space/god-mode
 npm install

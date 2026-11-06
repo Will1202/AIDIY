@@ -1,13 +1,18 @@
-# Builds the works that can run as a static site and publishes them to GitHub Pages:
-#   https://will1202.github.io/AIDIY/break-the-screen/
+# Builds every work as a static site and publishes them to GitHub Pages:
+#   https://will1202.github.io/AIDIY/          index of all works (.github/pages/index.html)
+#   https://will1202.github.io/AIDIY/<work>/   one folder per work, built from <category>/<work>/
 name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
-      - 'mixed-reality/break-the-screen/**'
+      - 'space/**'
+      - 'audio-visual/**'
+      - 'games/**'
+      - 'mixed-reality/**'
       - '.github/pages/**'
+      - '.github/assets/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -30,20 +35,24 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mixed-reality/break-the-screen/package-lock.json
+          cache-dependency-path: '*/*/package-lock.json'
 
-      - name: Test and build BREAK THE SCREEN
-        working-directory: mixed-reality/break-the-screen
+      - name: Test and build every work
         run: |
-          npm ci
-          npm test
-          npm run build
+          set -e
+          for dir in space/event-horizon space/god-mode audio-visual/liquid-frequency games/portal-paradox mixed-reality/break-the-screen; do
+            echo "::group::$dir"
+            (cd "$dir" && npm ci && npm test --if-present && npm run build)
+            mkdir -p "_site/$(basename "$dir")"
+            cp -r "$dir/dist/." "_site/$(basename "$dir")/"
+            echo "::endgroup::"
+          done
 
-      - name: Assemble the site
+      - name: Add the index page
         run: |
-          mkdir -p _site/break-the-screen
-          cp -r mixed-reality/break-the-screen/dist/. _site/break-the-screen/
           cp .github/pages/index.html _site/index.html
+          mkdir -p _site/assets
+          cp .github/assets/banner.jpg .github/assets/cover-*.jpg _site/assets/
 
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -54,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}break-the-screen/
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5

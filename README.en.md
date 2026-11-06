@@ -24,7 +24,7 @@ Every frame is computed on the GPU as you watch: no video, no baked textures, no
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0b0c10?style=for-the-badge&logo=mediapipe&logoColor=white)
 ![Web Audio](https://img.shields.io/badge/Web_Audio-0b0c10?style=for-the-badge)
 
-[Works](#works) &nbsp;·&nbsp; [Under the hood](#under-the-hood) &nbsp;·&nbsp; [Principles](#principles) &nbsp;·&nbsp; [Getting started](#getting-started)
+[Works](#works) &nbsp;·&nbsp; [Under the hood](#under-the-hood) &nbsp;·&nbsp; [Principles](#principles) &nbsp;·&nbsp; [Getting started](#getting-started) &nbsp;·&nbsp; [**▶ Try it live**](https://will1202.github.io/AIDIY/)
 
 </div>
 
@@ -38,13 +38,15 @@ Every frame is computed on the GPU as you watch: no video, no baked textures, no
 <a href="space/event-horizon"><img src=".github/assets/cover-event-horizon.jpg" alt="EVENT HORIZON"></a>
 <sub>01 · SPACE</sub><br>
 <b>EVENT HORIZON</b><br>
-A black hole that devours the web page it lives on.
+A black hole that devours the web page it lives on.<br>
+<sub><a href="https://will1202.github.io/AIDIY/event-horizon/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
 <a href="space/god-mode"><img src=".github/assets/cover-god-mode.jpg" alt="GOD MODE"></a>
 <sub>02 · SPACE</sub><br>
 <b>GOD MODE</b><br>
-Create, collapse and detonate a 262,000-particle universe with your hands.
+Create, collapse and detonate a 262,000-particle universe with your hands.<br>
+<sub><a href="https://will1202.github.io/AIDIY/god-mode/">▶ Try it live</a></sub>
 </td>
 </tr>
 <tr>
@@ -52,13 +54,15 @@ Create, collapse and detonate a 262,000-particle universe with your hands.
 <a href="audio-visual/liquid-frequency"><img src=".github/assets/cover-liquid-frequency.jpg" alt="LIQUID FREQUENCY"></a>
 <sub>03 · AUDIO-VISUAL</sub><br>
 <b>LIQUID FREQUENCY</b><br>
-A liquid chrome sculpture driven by music in real time.
+A liquid chrome sculpture driven by music in real time.<br>
+<sub><a href="https://will1202.github.io/AIDIY/liquid-frequency/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
 <a href="games/portal-paradox"><img src=".github/assets/cover-portal-paradox.jpg" alt="PORTAL PARADOX"></a>
 <sub>04 · GAMES</sub><br>
 <b>PORTAL PARADOX</b><br>
-Two truly connected portals, in a lab where gravity flips and time runs backwards.
+Two truly connected portals, in a lab where gravity flips and time runs backwards.<br>
+<sub><a href="https://will1202.github.io/AIDIY/portal-paradox/">▶ Try it live</a></sub>
 </td>
 </tr>
 <tr>
@@ -82,7 +86,7 @@ In the lab.
 
 ### 01 — EVENT HORIZON
 
-**What if a black hole could consume the internet?** &nbsp;<sub>[`space/event-horizon`](space/event-horizon)</sub>
+**What if a black hole could consume the internet?** &nbsp;<sub>[`space/event-horizon`](space/event-horizon) · [▶ Try it live](https://will1202.github.io/AIDIY/event-horizon/)</sub>
 
 <img src=".github/assets/strip-event-horizon.jpg" alt="EVENT HORIZON storyboard" width="100%">
 
@@ -98,7 +102,7 @@ It opens as a polished deep-space observatory website. Press **DESTROY REALITY**
 
 ### 02 — GOD MODE
 
-**Control the universe with your hands.** &nbsp;<sub>[`space/god-mode`](space/god-mode)</sub>
+**Control the universe with your hands.** &nbsp;<sub>[`space/god-mode`](space/god-mode) · [▶ Try it live](https://will1202.github.io/AIDIY/god-mode/)</sub>
 
 <img src=".github/assets/strip-god-mode.jpg" alt="GOD MODE storyboard" width="100%">
 
@@ -114,7 +118,7 @@ A particle universe that lives entirely on the GPU. Use a mouse, a touch screen,
 
 ### 03 — LIQUID FREQUENCY
 
-**Make sound visible.** &nbsp;<sub>[`audio-visual/liquid-frequency`](audio-visual/liquid-frequency)</sub>
+**Make sound visible.** &nbsp;<sub>[`audio-visual/liquid-frequency`](audio-visual/liquid-frequency) · [▶ Try it live](https://will1202.github.io/AIDIY/liquid-frequency/)</sub>
 
 <img src=".github/assets/strip-liquid-frequency.jpg" alt="LIQUID FREQUENCY storyboard" width="100%">
 
@@ -130,7 +134,7 @@ A liquid chrome sculpture played by music. Drop in a track: the bass swells the 
 
 ### 04 — PORTAL PARADOX
 
-**What if space was just an illusion?** &nbsp;<sub>[`games/portal-paradox`](games/portal-paradox)</sub>
+**What if space was just an illusion?** &nbsp;<sub>[`games/portal-paradox`](games/portal-paradox) · [▶ Try it live](https://will1202.github.io/AIDIY/portal-paradox/)</sub>
 
 <img src=".github/assets/strip-portal-paradox.jpg" alt="PORTAL PARADOX storyboard" width="100%">
 
@@ -202,6 +206,8 @@ Every work ships with an automatic demo and separate compositions for 16:9 lands
 </table>
 
 ## Getting started
+
+No install needed: every work runs live at <https://will1202.github.io/AIDIY/>
 
 You need [Node.js](https://nodejs.org/) 20.19 or newer and a desktop browser with WebGL2 (Chrome or Edge recommended). A webcam is optional.
 

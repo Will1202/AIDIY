@@ -12,6 +12,10 @@
 
 ## 运行
 
+**在线体验**：<https://will1202.github.io/AIDIY/portal-paradox/>（不用安装，打开就能玩）
+
+本地运行：
+
 ```bash
 cd games/portal-paradox
 npm install

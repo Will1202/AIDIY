@@ -12,6 +12,10 @@
 
 ## 启动
 
+**在线体验**：<https://will1202.github.io/AIDIY/liquid-frequency/>（不用安装，打开就能玩；你拖进来的音乐只在本机浏览器里分析）
+
+本地运行：
+
 需要 Node.js 20.19+（Vite 8 的最低要求，已在 Node 24 上验证）。
 
 ```bash

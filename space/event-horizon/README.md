@@ -8,6 +8,10 @@
 
 ## 运行
 
+**在线体验**：<https://will1202.github.io/AIDIY/event-horizon/>（不用安装，打开就能玩）
+
+本地运行：
+
 ```bash
 cd space/event-horizon
 npm install

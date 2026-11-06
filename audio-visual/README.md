@@ -7,7 +7,7 @@
 <a href="liquid-frequency"><img src="../.github/assets/cover-liquid-frequency.jpg" alt="LIQUID FREQUENCY" width="100%"></a>
 
 **LIQUID FREQUENCY**：被音乐实时驱动的液态铬金属雕塑。低音让它膨胀，高频让它颤动；drop 的瞬间炸成几千块碎片，再被引力吸回，长成新的形态。<br>
-<sub>拖入音乐，或直接看 30 秒 DEMO · <kbd>1</kbd>–<kbd>4</kbd> 切换形态 · <code>localhost:5178</code></sub>
+<sub>拖入音乐，或直接看 30 秒 DEMO · <kbd>1</kbd>–<kbd>4</kbd> 切换形态 · <code>localhost:5178</code> · <a href="https://will1202.github.io/AIDIY/liquid-frequency/">▶ 在线体验</a></sub>
 
 ```bash
 cd audio-visual/<作品目录>

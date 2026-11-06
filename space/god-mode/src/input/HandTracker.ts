@@ -1,8 +1,8 @@
 import type { HandLandmarker } from '@mediapipe/tasks-vision';
 import { GestureClassifier, type GestureEvents, type GestureState } from './GestureClassifier';
 
-const MODEL_URL =
-  'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+// Shipped in public/ (not fetched from Google's model bucket) so tracking also works where Google is blocked.
+const MODEL_PATH = 'mediapipe/models/hand_landmarker.task';
 
 const BONES = [
   [0, 1], [1, 2], [2, 3], [3, 4],
@@ -16,7 +16,7 @@ export type HandListener = (state: GestureState, events: GestureEvents) => void;
 
 /**
  * Webcam + MediaPipe HandLandmarker. Only started after an explicit user click.
- * The WASM runtime is served locally; the ~8 MB model is fetched on first use.
+ * The WASM runtime and the ~8 MB model are served from this site and loaded on first use.
  */
 export class HandTracker {
   running = false;
@@ -50,10 +50,11 @@ export class HandTracker {
       onStatus('LOADING HAND MODEL');
       const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
       const wasmBase = new URL(`${import.meta.env.BASE_URL}mediapipe/wasm`, location.href).href;
+      const modelUrl = new URL(`${import.meta.env.BASE_URL}${MODEL_PATH}`, location.href).href;
       const fileset = await FilesetResolver.forVisionTasks(wasmBase);
       const make = (delegate: 'GPU' | 'CPU') =>
         HandLandmarker.createFromOptions(fileset, {
-          baseOptions: { modelAssetPath: MODEL_URL, delegate },
+          baseOptions: { modelAssetPath: modelUrl, delegate },
           runningMode: 'VIDEO',
           numHands: 1,
           minHandDetectionConfidence: 0.6,

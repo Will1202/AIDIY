@@ -78,6 +78,6 @@ src/
 
 - Particles never touch the CPU per frame. Shapes are not stored anywhere: each particle maps its 8 random seeds to a target in every form. A morph is a staggered per-particle blend of targets, driven through spring physics and turbulence.
 - The black hole is a screen-space lens. The lens bends the background around the event horizon and draws a shadow and a photon ring. Particles in front of the hole write a mask into the alpha channel, so the near side of the disk stays sharp in front of the shadow.
-- The MediaPipe WASM runtime ships with the app. Only the ~8 MB hand model is fetched from Google's public model bucket, and only the first time you turn the camera on.
+- The MediaPipe WASM runtime and the ~8 MB hand model both ship with the app, so hand tracking never contacts Google's servers (it also works where they are blocked). The model is loaded the first time you turn the camera on. It is redistributed unmodified under Apache 2.0; see [`public/mediapipe/models`](public/mediapipe/models).
 - Debug hook: in the browser console, `godMode.advance(seconds)` steps the simulation deterministically.
 - Fallback: add `?lite` to the URL to force the Canvas-2D version.

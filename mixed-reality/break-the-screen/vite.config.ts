@@ -9,8 +9,8 @@ const WASM_DIR = resolve(root, 'node_modules/@mediapipe/tasks-vision/wasm')
 
 /**
  * MediaPipe's WASM runtime is served from this origin (dev middleware + copied
- * into dist at build) so tracking never depends on a CDN. Only the .task model
- * files are fetched from Google's public model bucket, on first camera start.
+ * into dist at build) so tracking never depends on a CDN. The .task models ship
+ * in public/mediapipe/models for the same reason.
  */
 function mediapipeWasm(): Plugin {
   return {

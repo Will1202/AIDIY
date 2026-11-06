@@ -32,7 +32,7 @@ npm run dev        # http://localhost:5187
 ```
 
 - 摄像头只能在 `localhost` 或 HTTPS 下打开（浏览器限制）。
-- 第一次点 START CAMERA 时，会从 Google 的公开模型仓库下载人脸 + 手部模型（约 11 MB，之后浏览器会缓存）。MediaPipe 的 WASM 运行时由本站自己提供，不依赖 CDN。
+- 第一次点 START CAMERA 时会加载人脸 + 手部模型（约 11 MB，之后浏览器会缓存）。模型和 MediaPipe 的 WASM 运行时都由本站自己提供，不依赖 Google 或 CDN，国内网络也能用。模型按 Apache 2.0 原样转发，来源见 [`public/mediapipe/models`](public/mediapipe/models)。
 - 推荐桌面版 Chrome / Edge（需要 WebGL2）。
 
 其他命令：`npm run build`（类型检查 + 生产构建）、`npm run preview`、`npm test`（21 个单元测试）、`npm run typecheck`。

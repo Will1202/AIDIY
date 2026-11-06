@@ -1,9 +1,12 @@
 import { FaceLandmarker, FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision'
 
-export const FACE_MODEL =
-  'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task'
-export const HAND_MODEL =
-  'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task'
+// The .task models ship in public/mediapipe/models, next to the WASM runtime, so tracking
+// never depends on Google's model bucket (unreachable in some regions).
+export const FACE_MODEL = 'face_landmarker.task'
+export const HAND_MODEL = 'hand_landmarker.task'
+
+/** `wasmBase` is the absolute …/mediapipe/wasm URL; the models sit in the sibling folder */
+const modelUrl = (wasmBase: string, file: string) => new URL(`../models/${file}`, `${wasmBase}/`).href
 
 export interface VisionResult {
   t: number
@@ -48,7 +51,7 @@ export class VisionRunner {
     const make = async (delegate: 'GPU' | 'CPU') => {
       arm()
       const face = await FaceLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: FACE_MODEL, delegate },
+        baseOptions: { modelAssetPath: modelUrl(wasmBase, FACE_MODEL), delegate },
         runningMode: 'VIDEO',
         numFaces: 2,
         minFaceDetectionConfidence: 0.5,
@@ -59,7 +62,7 @@ export class VisionRunner {
       })
       arm()
       const hand = await HandLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: HAND_MODEL, delegate },
+        baseOptions: { modelAssetPath: modelUrl(wasmBase, HAND_MODEL), delegate },
         runningMode: 'VIDEO',
         numHands: 2,
         minHandDetectionConfidence: 0.55,

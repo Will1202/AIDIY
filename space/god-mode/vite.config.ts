@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 // MediaPipe's WASM runtime is served locally so hand tracking does not depend on a CDN.
-// Only the hand-landmark model itself is fetched from Google's public model bucket on demand.
+// The hand-landmark model ships in public/mediapipe/models for the same reason.
 export default defineConfig({
   base: './',
   plugins: [

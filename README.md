@@ -9,12 +9,12 @@
 
 <h3>在浏览器里实时运行的视觉实验</h3>
 
-黑洞、传送门、液态金属，还有一块会被打碎的屏幕。<br>
+黑洞、传送门、液态金属、一块会被打碎的屏幕，还有一张能画出整个江湖的宣纸。<br>
 每一帧都由 GPU 当场计算：不是视频，不靠贴图，也不需要服务器。
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-05-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-06-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
@@ -74,10 +74,21 @@
 <sub><a href="https://will1202.github.io/AIDIY/break-the-screen/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
+<a href="generative-art/inkverse"><img src=".github/assets/cover-inkverse.jpg" alt="INKVERSE"></a>
+<sub>06 · GENERATIVE ART · 生成艺术</sub><br>
+<b>INKVERSE · 一笔入江湖</b><br>
+在宣纸上画山画河，墨迹真的长成一个可以走进去的水墨世界。<br>
+<sub><a href="https://will1202.github.io/AIDIY/inkverse/">▶ 在线体验</a></sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="下一个实验制作中">
-<sub>06 · NEXT</sub><br>
+<sub>07 · NEXT</sub><br>
 <b>下一个实验</b><br>
 制作中。
+</td>
+<td width="50%" valign="top">
 </td>
 </tr>
 </table>
@@ -164,6 +175,22 @@
 
 <br>
 
+### 06 — INKVERSE · 一笔入江湖
+
+**每一笔，都可以创造一个世界。** &nbsp;<sub>[`generative-art/inkverse`](generative-art/inkverse) · [▶ 在线体验](https://will1202.github.io/AIDIY/inkverse/)</sub>
+
+<img src=".github/assets/strip-inkverse.jpg" alt="INKVERSE 演示分镜" width="100%">
+
+拿起一支毛笔，在宣纸上画一道山脊，墨迹洇开，然后山真的从纸里升起来；顺着地势画一条河，水沿着笔迹流动；点一滴墨，长出一棵松；在两岸之间画一条线，架起一座能走的桥。按下 AWAKEN，整张纸鼓成一个有天空、雾气和远山的三维水墨世界，最后你可以变成一个戴斗笠的小侠客，走过自己画的桥。
+
+- **墨水是模拟出来的**：笔触按速度、停留和剩余墨量变化出飞白与积墨，湿墨在 GPU 上沿宣纸纤维渗开、在干燥前沿积出水痕，雨天还会重新晕开。
+- **笔迹就是地形**：山脊、河道、桥位都由你实际画的路径决定；纸面和三维地面共用一套坐标，从纸到山河的变化是同一个场景的连续过渡，不是切换画面。
+- **能走进去的画**：程序化角色在高度场与桥面上真实行走；昼、暮、夜、雨、风全部连续过渡，声音也全部实时合成。
+
+<sub><b>技术</b>&nbsp; React 19 · Three.js · GLSL 墨水模拟 · 程序化高度场 · NPR 水墨渲染 · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>操作</b>&nbsp; 鼠标 / 手写笔绘画，<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 行走，按 <kbd>C</kbd> 播放 30 秒演示</sub>
+
+<br>
+
 ## 技术亮点
 
 | 技术 | 做法 | 作品 |
@@ -178,6 +205,9 @@
 | 离轴投影 | 按头部位置实时计算非对称视锥，屏幕成为一扇窗 | BREAK THE SCREEN |
 | Voronoi 碎裂 | 蛛网裂纹生成凸包刚体玻璃碎片 | BREAK THE SCREEN |
 | 手势与人脸追踪 | MediaPipe 关键点 + 自写手势分类器 | GOD MODE · BREAK THE SCREEN |
+| 墨水物理 | 笔刷印章 + GPU 湿墨扩散：纤维渗水、水痕、沉积、雨天再晕开 | INKVERSE |
+| 笔迹生成世界 | 笔画驱动的高度场：山脊平滑并集、河道下切、桥面解析碰撞 | INKVERSE |
+| 水墨 NPR | 皴法与勾线着色、反深度勾边、远景淡化、交叠雾层 | INKVERSE |
 | 程序化声音 | Web Audio 实时合成全部音效与配乐，不含任何采样 | 全部作品 |
 
 ## 创作原则
@@ -225,6 +255,7 @@ npm run dev
 | LIQUID FREQUENCY | [`audio-visual/liquid-frequency`](audio-visual/liquid-frequency) | `http://localhost:5178` |
 | PORTAL PARADOX | [`games/portal-paradox`](games/portal-paradox) | `http://localhost:5184` |
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
+| INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
 
 每个作品目录里都有一份完整的 README，包含实现原理、全部快捷键、录屏建议和已知限制。
 

@@ -11,6 +11,7 @@ on:
       - 'audio-visual/**'
       - 'games/**'
       - 'mixed-reality/**'
+      - 'generative-art/**'
       - '.github/pages/**'
       - '.github/assets/**'
       - '.github/workflows/pages.yml'
@@ -40,7 +41,7 @@ jobs:
       - name: Test and build every work
         run: |
           set -e
-          for dir in space/event-horizon space/god-mode audio-visual/liquid-frequency games/portal-paradox mixed-reality/break-the-screen; do
+          for dir in space/event-horizon space/god-mode audio-visual/liquid-frequency games/portal-paradox mixed-reality/break-the-screen generative-art/inkverse; do
             echo "::group::$dir"
             (cd "$dir" && npm ci && npm test --if-present && npm run build)
             mkdir -p "_site/$(basename "$dir")"

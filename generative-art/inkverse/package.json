@@ -1,0 +1,32 @@
+{
+  "name": "inkverse",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "INKVERSE — 一笔入江湖. Paint ink strokes on rice paper and watch them rise into a walkable 3D ink-wash world.",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/ma-shan-zheng": "^5.3.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "three": "~0.187.0",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/three": "~0.187.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

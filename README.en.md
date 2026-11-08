@@ -9,12 +9,12 @@
 
 <h3>Visual experiments that run live in your browser</h3>
 
-A black hole, a pair of portals, liquid chrome, and a screen you can break from the inside.<br>
+A black hole, a pair of portals, liquid chrome, a screen you can break from the inside, and a sheet of rice paper that paints a whole world.<br>
 Every frame is computed on the GPU as you watch: no video, no baked textures, no server.
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-05-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-06-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
@@ -74,10 +74,21 @@ Your screen becomes a window. Reach in and shatter the glass from the inside.<br
 <sub><a href="https://will1202.github.io/AIDIY/break-the-screen/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
+<a href="generative-art/inkverse"><img src=".github/assets/cover-inkverse.jpg" alt="INKVERSE"></a>
+<sub>06 · GENERATIVE ART</sub><br>
+<b>INKVERSE</b><br>
+Paint mountains and rivers on rice paper, and the ink grows into a world you can walk into.<br>
+<sub><a href="https://will1202.github.io/AIDIY/inkverse/">▶ Try it live</a></sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="Next experiment in progress">
-<sub>06 · NEXT</sub><br>
+<sub>07 · NEXT</sub><br>
 <b>Next experiment</b><br>
 In the lab.
+</td>
+<td width="50%" valign="top">
 </td>
 </tr>
 </table>
@@ -164,6 +175,22 @@ The screen becomes a window into a "dimensional lab". The webcam tracks your hea
 
 <br>
 
+### 06 — INKVERSE
+
+**Every stroke creates a world.** &nbsp;<sub>[`generative-art/inkverse`](generative-art/inkverse) · [▶ Try it live](https://will1202.github.io/AIDIY/inkverse/)</sub>
+
+<img src=".github/assets/strip-inkverse.jpg" alt="INKVERSE storyboard" width="100%">
+
+Pick up a brush and draw a ridge on rice paper: the ink bleeds, then the mountain really rises out of the sheet. Draw a river and water flows along your stroke; drop ink and a pine grows from it; draw a line between two banks and a walkable bridge is built. Press AWAKEN and the whole sheet swells into a 3D ink-wash world with sky, mist and distant ranges, and finally you can step in as a small swordsman and cross the bridge you painted.
+
+- **Simulated ink**: speed, dwell time and remaining ink shape dry-brush streaks and pooled ink; wet ink wicks along the paper fibres on the GPU, leaves tide lines as it dries, and bleeds again in the rain.
+- **Your strokes are the terrain**: ridges, river beds and bridge spans come from the actual drawn path. Paper and ground share one coordinate system, so going from sheet to landscape is one continuous scene, not a cut.
+- **A painting you can walk in**: a procedural character walks the heightfield and the bridge decks; day, dusk, night, rain and wind all blend live, and every sound is synthesized.
+
+<sub><b>TECH</b>&nbsp; React 19 · Three.js · GLSL ink simulation · procedural heightfields · NPR ink-wash rendering · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>PLAY</b>&nbsp; draw with mouse or pen, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to walk, press <kbd>C</kbd> for the 30-second demo</sub>
+
+<br>
+
 ## Under the hood
 
 | Technique | How | Work |
@@ -178,6 +205,9 @@ The screen becomes a window into a "dimensional lab". The webcam tracks your hea
 | Off-axis projection | Asymmetric frustum from the viewer's head position turns the screen into a window | BREAK THE SCREEN |
 | Voronoi fracture | Spider-web cracks generating convex-hull rigid-body glass shards | BREAK THE SCREEN |
 | Hand and face tracking | MediaPipe landmarks plus a hand-written gesture classifier | GOD MODE · BREAK THE SCREEN |
+| Ink physics | Brush stamps plus GPU wet-ink diffusion: fibre wicking, tide lines, deposition, re-wetting in rain | INKVERSE |
+| Strokes into worlds | Stroke-driven heightfield: smooth union of ridges, carved river beds, analytic bridge-deck collision | INKVERSE |
+| Ink-wash NPR | Texture-stroke and contour shading, inverse-depth outlines, atmospheric fading, layered mist | INKVERSE |
 | Procedural sound | Every effect and score synthesized live with Web Audio, no samples | All works |
 
 ## Principles
@@ -225,6 +255,7 @@ npm run dev
 | LIQUID FREQUENCY | [`audio-visual/liquid-frequency`](audio-visual/liquid-frequency) | `http://localhost:5178` |
 | PORTAL PARADOX | [`games/portal-paradox`](games/portal-paradox) | `http://localhost:5184` |
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
+| INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
 
 Each work's folder has a full README (in Chinese, except GOD MODE) covering how it works, every shortcut, recording tips and known limitations.
 

@@ -9,18 +9,19 @@
 
 <h3>在浏览器里实时运行的视觉实验</h3>
 
-黑洞、传送门、液态金属、一块会被打碎的屏幕，还有一张能画出整个江湖的宣纸。<br>
+黑洞、传送门、液态金属、一块会被打碎的屏幕、一张能画出整个江湖的宣纸，还有一座被一颗小球撬动的机械塔。<br>
 每一帧都由 GPU 当场计算：不是视频，不靠贴图，也不需要服务器。
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-06-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-07-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-0b0c10?style=for-the-badge&logo=typescript&logoColor=3178C6)
 ![React](https://img.shields.io/badge/React_19-0b0c10?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite_8-0b0c10?style=for-the-badge&logo=vite&logoColor=white)
+![Rapier](https://img.shields.io/badge/Rapier_Physics-0b0c10?style=for-the-badge)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0b0c10?style=for-the-badge&logo=mediapipe&logoColor=white)
 ![Web Audio](https://img.shields.io/badge/Web_Audio-0b0c10?style=for-the-badge)
 
@@ -83,12 +84,17 @@
 </tr>
 <tr>
 <td width="50%" valign="top">
-<img src=".github/assets/next.jpg" alt="下一个实验制作中">
-<sub>07 · NEXT</sub><br>
-<b>下一个实验</b><br>
-制作中。
+<a href="games/chain-reaction"><img src=".github/assets/cover-chain-reaction.jpg" alt="CHAIN REACTION"></a>
+<sub>07 · GAMES · 交互世界</sub><br>
+<b>CHAIN REACTION · 万象机关</b><br>
+一颗小球放下去，整座 30 米高的机械塔被真实物理一环一环唤醒。<br>
+<sub><a href="https://will1202.github.io/AIDIY/chain-reaction/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
+<img src=".github/assets/next.jpg" alt="下一个实验制作中">
+<sub>08 · NEXT</sub><br>
+<b>下一个实验</b><br>
+制作中。
 </td>
 </tr>
 </table>
@@ -189,6 +195,20 @@
 
 <sub><b>技术</b>&nbsp; React 19 · Three.js · GLSL 墨水模拟 · 程序化高度场 · NPR 水墨渲染 · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>操作</b>&nbsp; 鼠标 / 手写笔绘画，<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 行走，按 <kbd>C</kbd> 播放 30 秒演示</sub>
 
+### 07 — CHAIN REACTION · 万象机关
+
+**一颗小球，撬动整个世界。** &nbsp;<sub>[`games/chain-reaction`](games/chain-reaction) · [▶ 在线体验](https://will1202.github.io/AIDIY/chain-reaction/)</sub>
+
+<img src=".github/assets/strip-chain-reaction.jpg" alt="CHAIN REACTION 演示分镜" width="100%">
+
+一座分成 8 个区域的黄铜机械塔。按下 START，一颗钢珠滚下螺旋轨道、撞倒 26 块越来越大的多米诺；最后一块砸翻杠杆、按下开关，电机带动四级齿轮，凸轮放出三颗弹珠，传送带和转盘把它们送进滑轮吊桶；配重升起松开摆锤，摆锤撞响弹簧发射器，钢珠飞过半座塔、坐升降机登上塔顶，最后点亮塔顶那台会展开的终极装置。还可以进入建造模式，自己搭一台。
+
+- **每一环都是真的**：Rapier 刚体物理，固定 120 Hz 步长；多米诺、杠杆、摆锤、弹簧柱塞都靠碰撞和关节传递，电机和传感器有明确的输入信号。没有任何机关按时间表动作，断在哪一环，界面就告诉你断在哪、为什么。
+- **可验证的稳定性**：同一份场景在 Node 和浏览器里逐阶段时间完全一致；17 项自动测试，加上带随机装配误差的无头试验：±3 mm 下 30 / 30 次跑通。
+- **时间倒流与建造**：90 秒完整状态记录，倒下的骨牌会按原轨迹重新站起；建造模式有 22 种组件、轨道接口吸附、撤销重做、JSON 存档与导入校验。
+
+<sub><b>技术</b>&nbsp; React 19 · Three.js · Rapier 物理 · 运动学齿轮传动 · 事件驱动自动导演 · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>操作</b>&nbsp; 鼠标拖拽观察，<kbd>Space</kbd> 播放，<kbd>B</kbd> 倒流，<kbd>C</kbd> 切镜头，首页 WATCH CINEMATIC 播放电影模式</sub>
+
 <br>
 
 ## 技术亮点
@@ -201,7 +221,10 @@
 | SDF 光线步进 | 可融合、分裂的元球液态金属，程序化摄影棚反射 | LIQUID FREQUENCY |
 | 实时音频分析 | FFT 分频段能量、谱通量节拍、BPM、drop 识别 | LIQUID FREQUENCY |
 | 递归传送门渲染 | 每层递归独立虚拟相机，偏轴子视锥 + 裁剪面 | PORTAL PARADOX |
-| 物理状态回放 | 10 秒环形缓冲记录全部刚体状态，支持时间倒流 | PORTAL PARADOX |
+| 物理状态回放 | 环形缓冲记录全部刚体与机关状态，倒放后从任意时刻续算 | PORTAL PARADOX · CHAIN REACTION |
+| 刚体连锁反应 | 碰撞、关节、弹簧电机与传感器组成的 14 阶段因果链，带失败诊断 | CHAIN REACTION |
+| 运动学齿轮传动 | 按几何自动识别啮合，ω₂ = −ω₁·N₁/N₂，齿相位自动对齐 | CHAIN REACTION |
+| 无头物理测试 | 同一模拟核心在 Node 中批量运行，带随机装配误差统计成功率 | CHAIN REACTION |
 | 离轴投影 | 按头部位置实时计算非对称视锥，屏幕成为一扇窗 | BREAK THE SCREEN |
 | Voronoi 碎裂 | 蛛网裂纹生成凸包刚体玻璃碎片 | BREAK THE SCREEN |
 | 手势与人脸追踪 | MediaPipe 关键点 + 自写手势分类器 | GOD MODE · BREAK THE SCREEN |
@@ -256,6 +279,7 @@ npm run dev
 | PORTAL PARADOX | [`games/portal-paradox`](games/portal-paradox) | `http://localhost:5184` |
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
 | INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
+| CHAIN REACTION | [`games/chain-reaction`](games/chain-reaction) | `http://localhost:5193` |
 
 每个作品目录里都有一份完整的 README，包含实现原理、全部快捷键、录屏建议和已知限制。
 

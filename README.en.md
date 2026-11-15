@@ -9,18 +9,19 @@
 
 <h3>Visual experiments that run live in your browser</h3>
 
-A black hole, a pair of portals, liquid chrome, a screen you can break from the inside, and a sheet of rice paper that paints a whole world.<br>
+A black hole, a pair of portals, liquid chrome, a screen you can break from the inside, a sheet of rice paper that paints a whole world, and a machine tower set off by a single marble.<br>
 Every frame is computed on the GPU as you watch: no video, no baked textures, no server.
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-06-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-07-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-0b0c10?style=for-the-badge&logo=typescript&logoColor=3178C6)
 ![React](https://img.shields.io/badge/React_19-0b0c10?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Vite](https://img.shields.io/badge/Vite_8-0b0c10?style=for-the-badge&logo=vite&logoColor=white)
+![Rapier](https://img.shields.io/badge/Rapier_Physics-0b0c10?style=for-the-badge)
 ![MediaPipe](https://img.shields.io/badge/MediaPipe-0b0c10?style=for-the-badge&logo=mediapipe&logoColor=white)
 ![Web Audio](https://img.shields.io/badge/Web_Audio-0b0c10?style=for-the-badge)
 
@@ -83,12 +84,17 @@ Paint mountains and rivers on rice paper, and the ink grows into a world you can
 </tr>
 <tr>
 <td width="50%" valign="top">
-<img src=".github/assets/next.jpg" alt="Next experiment in progress">
-<sub>07 · NEXT</sub><br>
-<b>Next experiment</b><br>
-In the lab.
+<a href="games/chain-reaction"><img src=".github/assets/cover-chain-reaction.jpg" alt="CHAIN REACTION"></a>
+<sub>07 · GAMES</sub><br>
+<b>CHAIN REACTION</b><br>
+Drop one marble and a 30-metre machine wakes up, link by real physical link.<br>
+<sub><a href="https://will1202.github.io/AIDIY/chain-reaction/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
+<img src=".github/assets/next.jpg" alt="Next experiment in progress">
+<sub>08 · NEXT</sub><br>
+<b>Next experiment</b><br>
+In the lab.
 </td>
 </tr>
 </table>
@@ -189,6 +195,20 @@ Pick up a brush and draw a ridge on rice paper: the ink bleeds, then the mountai
 
 <sub><b>TECH</b>&nbsp; React 19 · Three.js · GLSL ink simulation · procedural heightfields · NPR ink-wash rendering · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>PLAY</b>&nbsp; draw with mouse or pen, <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> to walk, press <kbd>C</kbd> for the 30-second demo</sub>
 
+### 07 — CHAIN REACTION
+
+**One marble. A thousand consequences.** &nbsp;<sub>[`games/chain-reaction`](games/chain-reaction) · [▶ Try it live](https://will1202.github.io/AIDIY/chain-reaction/)</sub>
+
+<img src=".github/assets/strip-chain-reaction.jpg" alt="CHAIN REACTION storyboard" width="100%">
+
+A brass tower in eight zones. Press START and a steel marble rolls down a spiral and topples 26 ever-larger dominoes; the last one flips a lever onto a switch, a motor drives a four-stage gear train, a cam releases three marbles, a conveyor and a turntable deliver them into a pulley bucket; the rising counterweight unlatches a pendulum, the pendulum trips a spring launcher, the marble flies across the tower, rides a lift to the crown and wakes the Final Machine. Then open the builder and make your own.
+
+- **Every link is real**: Rapier rigid bodies at a fixed 120 Hz; dominoes, levers, the pendulum and the spring plunger pass the chain on through contacts and joints, motors and sensors have explicit inputs. Nothing runs on a timeline, and when a link fails the HUD says which one and why.
+- **Measured reliability**: the same scene gives identical stage timings headless in Node and in the browser; 17 automated tests plus headless trials with random assembly tolerance: 30 / 30 runs complete at ±3 mm.
+- **Rewind and build**: 90 s of full state history, so fallen dominoes stand back up along their real paths; a builder with 22 parts, port snapping, undo / redo, and validated JSON save / import.
+
+<sub><b>TECH</b>&nbsp; React 19 · Three.js · Rapier physics · kinematic gear trains · event-driven auto director · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>PLAY</b>&nbsp; drag to look around, <kbd>Space</kbd> to play, <kbd>B</kbd> to rewind, <kbd>C</kbd> for cameras, WATCH CINEMATIC for the film</sub>
+
 <br>
 
 ## Under the hood
@@ -201,7 +221,10 @@ Pick up a brush and draw a ridge on rice paper: the ink bleeds, then the mountai
 | SDF ray marching | Metaball liquid metal that merges and splits, with procedural studio reflections | LIQUID FREQUENCY |
 | Real-time audio analysis | FFT band energies, spectral-flux beats, BPM, drop detection | LIQUID FREQUENCY |
 | Recursive portal rendering | One virtual camera per recursion level, off-axis sub-frustum plus clipping planes | PORTAL PARADOX |
-| Physics state replay | 10-second ring buffer of every rigid body, enabling time rewind | PORTAL PARADOX |
+| Physics state replay | Ring buffer of every rigid body and machine state; rewind resumes from any moment | PORTAL PARADOX · CHAIN REACTION |
+| Rigid-body chain reaction | A 14-stage causal chain of contacts, joints, spring motors and sensors, with failure diagnosis | CHAIN REACTION |
+| Kinematic gear trains | Meshes detected from geometry, ω₂ = −ω₁·N₁/N₂, tooth phases aligned automatically | CHAIN REACTION |
+| Headless physics testing | The same simulation core runs in Node to measure success rates under random assembly tolerance | CHAIN REACTION |
 | Off-axis projection | Asymmetric frustum from the viewer's head position turns the screen into a window | BREAK THE SCREEN |
 | Voronoi fracture | Spider-web cracks generating convex-hull rigid-body glass shards | BREAK THE SCREEN |
 | Hand and face tracking | MediaPipe landmarks plus a hand-written gesture classifier | GOD MODE · BREAK THE SCREEN |
@@ -256,6 +279,7 @@ npm run dev
 | PORTAL PARADOX | [`games/portal-paradox`](games/portal-paradox) | `http://localhost:5184` |
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
 | INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
+| CHAIN REACTION | [`games/chain-reaction`](games/chain-reaction) | `http://localhost:5193` |
 
 Each work's folder has a full README (in Chinese, except GOD MODE) covering how it works, every shortcut, recording tips and known limitations.
 

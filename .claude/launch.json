@@ -7,6 +7,7 @@
     { "name": "portal-paradox", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "games/portal-paradox", "run", "dev", "--", "--port", "5184", "--strictPort"], "port": 5184 },
     { "name": "break-the-screen", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "mixed-reality/break-the-screen", "run", "dev", "--", "--port", "5187", "--strictPort"], "port": 5187 },
     { "name": "inkverse", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "generative-art/inkverse", "run", "dev", "--", "--port", "5190", "--strictPort"], "port": 5190 },
-    { "name": "chain-reaction", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "games/chain-reaction", "run", "dev", "--", "--port", "5193", "--strictPort"], "port": 5193 }
+    { "name": "chain-reaction", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "games/chain-reaction", "run", "dev", "--", "--port", "5193", "--strictPort"], "port": 5193 },
+    { "name": "the-last-train", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "games/the-last-train", "run", "dev", "--", "--port", "5196", "--strictPort"], "port": 5196 }
   ]
 }

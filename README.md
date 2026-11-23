@@ -14,7 +14,7 @@
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-07-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-08-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
@@ -91,10 +91,21 @@
 <sub><a href="https://will1202.github.io/AIDIY/chain-reaction/">▶ 在线体验</a></sub>
 </td>
 <td width="50%" valign="top">
+<a href="games/the-last-train"><img src=".github/assets/cover-the-last-train.jpg" alt="THE LAST TRAIN"></a>
+<sub>08 · GAMES · 交互世界</sub><br>
+<b>THE LAST TRAIN · 永不抵达的末班列车</b><br>
+午夜 00:00，一辆没有终点的列车。六个世界、真实谜题、三个结局的第一人称探索游戏。<br>
+<sub><a href="https://will1202.github.io/AIDIY/the-last-train/">▶ 在线体验</a></sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="下一个实验制作中">
-<sub>08 · NEXT</sub><br>
+<sub>09 · NEXT</sub><br>
 <b>下一个实验</b><br>
 制作中。
+</td>
+<td width="50%" valign="top">
 </td>
 </tr>
 </table>
@@ -209,6 +220,20 @@
 
 <sub><b>技术</b>&nbsp; React 19 · Three.js · Rapier 物理 · 运动学齿轮传动 · 事件驱动自动导演 · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>操作</b>&nbsp; 鼠标拖拽观察，<kbd>Space</kbd> 播放，<kbd>B</kbd> 倒流，<kbd>C</kbd> 切镜头，首页 WATCH CINEMATIC 播放电影模式</sub>
 
+### 08 — THE LAST TRAIN · 永不抵达的末班列车
+
+**午夜 00:00，一辆没有终点的列车停在站台。** &nbsp;<sub>[`games/the-last-train`](games/the-last-train) · [▶ 在线体验](https://will1202.github.io/AIDIY/the-last-train/)</sub>
+
+<img src=".github/assets/strip-the-last-train.jpg" alt="THE LAST TRAIN 演示分镜" width="100%">
+
+你在暴雨中的零号站台醒来，手里是一张没有目的地的车票。列车穿行于六个世界：雨夜车站、头顶倒挂着另一座城的天空之城、被海水包围的观测穹顶、时间停在半空的沙漠、会随视角改变结构的记忆博物馆，以及那座从未存在过的终点站。每个世界有自己的物理规则和必须真的解开的谜题，一路收集的线索与选择决定三个结局中的哪一个能够达成。
+
+- **真的能玩**：第一人称移动与碰撞、重力翻转、绕桥轴旋转的桥段、探照灯与声呐对频（可以“听拍音”调准）、对物体倒转 / 暂停 / 恢复时间、错视拼合、你不看时才出现的门、影子雕塑、镜中世界。六个世界的完整通关路线都由 Node 里的真实碰撞模拟自动走通。
+- **一个雨夜就是一部电影**：GPU 雨丝与溅起的水花、积水平面反射与雨点涟漪、灯下体积光、开场列车从雨雾中驶入的长镜头；驶入倒悬都市时整座城从云海下翻到头顶，深海里车厢熄灯、巨鲸贴着车窗游过。
+- **一切都是程序生成**：模型、纹理和全部声音（雨、风、轮轨、汽笛、鲸歌、钟声）都在运行时生成，仓库里没有任何美术或音频素材；本地 IndexedDB 存档，刷新页面不丢进度；展映模式可回放已解锁的标志性时刻用于录屏。
+
+<sub><b>技术</b>&nbsp; React 19 · Three.js · 自写胶囊碰撞（支持重力翻转）· 分支剧情状态机 · IndexedDB 存档 · Web Audio 空间音频 &nbsp;&nbsp;|&nbsp;&nbsp; <b>操作</b>&nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动，鼠标视角，<kbd>E</kbd> 交互，<kbd>Tab</kbd> 背包，<kbd>C</kbd> 电影模式，<kbd>P</kbd> 拍照</sub>
+
 <br>
 
 ## 技术亮点
@@ -280,6 +305,7 @@ npm run dev
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
 | INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
 | CHAIN REACTION | [`games/chain-reaction`](games/chain-reaction) | `http://localhost:5193` |
+| THE LAST TRAIN | [`games/the-last-train`](games/the-last-train) | `http://localhost:5196` |
 
 每个作品目录里都有一份完整的 README，包含实现原理、全部快捷键、录屏建议和已知限制。
 

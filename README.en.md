@@ -14,7 +14,7 @@ Every frame is computed on the GPU as you watch: no video, no baked textures, no
 
 <br>
 
-![Experiments](https://img.shields.io/badge/EXPERIMENTS-07-f4f5f7?style=for-the-badge&labelColor=0b0c10)
+![Experiments](https://img.shields.io/badge/EXPERIMENTS-08-f4f5f7?style=for-the-badge&labelColor=0b0c10)
 ![WebGL2](https://img.shields.io/badge/WebGL2-0b0c10?style=for-the-badge&logo=webgl&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js_r187-0b0c10?style=for-the-badge&logo=threedotjs&logoColor=white)
 ![GLSL](https://img.shields.io/badge/GLSL-0b0c10?style=for-the-badge&logo=opengl&logoColor=white)
@@ -91,10 +91,21 @@ Drop one marble and a 30-metre machine wakes up, link by real physical link.<br>
 <sub><a href="https://will1202.github.io/AIDIY/chain-reaction/">▶ Try it live</a></sub>
 </td>
 <td width="50%" valign="top">
+<a href="games/the-last-train"><img src=".github/assets/cover-the-last-train.jpg" alt="THE LAST TRAIN"></a>
+<sub>08 · GAMES · INTERACTIVE WORLDS</sub><br>
+<b>THE LAST TRAIN</b><br>
+Midnight, 00:00: a train with no terminus. A first-person exploration game across six worlds, with real puzzles and three endings.<br>
+<sub><a href="https://will1202.github.io/AIDIY/the-last-train/">▶ Try it live</a></sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 <img src=".github/assets/next.jpg" alt="Next experiment in progress">
-<sub>08 · NEXT</sub><br>
+<sub>09 · NEXT</sub><br>
 <b>Next experiment</b><br>
 In the lab.
+</td>
+<td width="50%" valign="top">
 </td>
 </tr>
 </table>
@@ -209,6 +220,20 @@ A brass tower in eight zones. Press START and a steel marble rolls down a spiral
 
 <sub><b>TECH</b>&nbsp; React 19 · Three.js · Rapier physics · kinematic gear trains · event-driven auto director · Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>PLAY</b>&nbsp; drag to look around, <kbd>Space</kbd> to play, <kbd>B</kbd> to rewind, <kbd>C</kbd> for cameras, WATCH CINEMATIC for the film</sub>
 
+### 08 — THE LAST TRAIN
+
+**Midnight, 00:00. A train with no terminus waits at the platform.** &nbsp;<sub>[`games/the-last-train`](games/the-last-train) · [▶ Try it live](https://will1202.github.io/AIDIY/the-last-train/)</sub>
+
+<img src=".github/assets/strip-the-last-train.jpg" alt="THE LAST TRAIN storyboard" width="100%">
+
+You wake on a rain-soaked platform holding a ticket with no destination. The train runs through six worlds: the midnight station, a sky city with a second city hanging upside down above it, a glass dome at the bottom of the sea, a desert where time has stopped mid-air, a museum whose rooms change when you look away, and the station that never was. Each world has its own rules and puzzles you really have to solve, and what you find and choose decides which of three endings you can reach.
+
+- **Actually playable**: first-person movement and collision, gravity flips, bridge segments that rotate around their own axis, a searchlight and a sonar you can tune by ear, rewind / pause / resume time on objects, an anamorphic puzzle, a door that only appears when you are not looking, a shadow sculpture, a world behind the mirror. The full route through every world is walked automatically in Node with real collision.
+- **Cinematic by default**: GPU rain and splashes, planar puddle reflections with ripples, volumetric lamp light, an opening shot of the train emerging from the storm; the sky city flips overhead as you arrive, and in the deep the carriage goes dark while a whale glides past the windows.
+- **Everything is generated**: models, textures and all sound (rain, wind, rails, horn, whale song, bells) are made at runtime, with no art or audio assets in the repo. IndexedDB saves survive a page refresh, and a Showcase mode replays unlocked key moments for recording.
+
+<sub><b>Tech</b>&nbsp; React 19 · Three.js · custom capsule collision with gravity flips · branching dialogue state machine · IndexedDB saves · spatial Web Audio &nbsp;&nbsp;|&nbsp;&nbsp; <b>Controls</b>&nbsp; <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, mouse look, <kbd>E</kbd> interact, <kbd>Tab</kbd> inventory, <kbd>C</kbd> cinema mode, <kbd>P</kbd> photo mode</sub>
+
 <br>
 
 ## Under the hood
@@ -280,6 +305,7 @@ npm run dev
 | BREAK THE SCREEN | [`mixed-reality/break-the-screen`](mixed-reality/break-the-screen) | `http://localhost:5187` |
 | INKVERSE | [`generative-art/inkverse`](generative-art/inkverse) | `http://localhost:5190` |
 | CHAIN REACTION | [`games/chain-reaction`](games/chain-reaction) | `http://localhost:5193` |
+| THE LAST TRAIN | [`games/the-last-train`](games/the-last-train) | `http://localhost:5196` |
 
 Each work's folder has a full README (in Chinese, except GOD MODE) covering how it works, every shortcut, recording tips and known limitations.
 

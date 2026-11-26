@@ -52,7 +52,8 @@ export const RECIPES: Recipe[] = [
     ok: () => !S.is('ticket.punched'),
     apply: () => {
       S.set('ticket.punched')
-      return '咔哒。你给自己的车票检了票。月牙形的孔里，透出一点车厢的暖光。'
+      S.take('punch')
+      return '咔哒。你给自己的车票检了票。月牙形的孔里，透出一点车厢的暖光。检票钳用不上了。'
     },
   },
 ]

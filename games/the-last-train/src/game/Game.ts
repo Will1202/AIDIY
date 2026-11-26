@@ -392,7 +392,8 @@ export class Game implements GameApi {
     this.conductor.group.visible = true
     this.placeConductor()
     this.syncConsole()
-    gameStore.setState({ world: id })
+    // 主菜单背景加载的车站不能改写存档里玩家所在的世界（否则“继续游戏”总会回到车站）
+    if (!menu) gameStore.setState({ world: id })
     setUI({ world: id })
     return w
   }
@@ -787,6 +788,10 @@ export class Game implements GameApi {
     this.lock()
     const st = this.world as unknown as { intro(): Promise<void> }
     await st.intro()
+    // 车站也是一个章节：开场之后存一个章节快照
+    S.visit('station')
+    this.fillSave()
+    Meta.checkpoint('station', gameStore.getState())
     this.save()
   }
 
@@ -829,7 +834,10 @@ export class Game implements GameApi {
     gameStore.setState({ aboard: true, player: null })
     await this.loadWorld(w)
     this.player.setGravity(1)
-    this.player.teleport(3.8, FLOOR_Y, 0.2, -Math.PI / 2, 0)
+    if (w === 'station') {
+      const sp = this.world!.spawn
+      this.player.teleport(sp.x, sp.y, sp.z, sp.yaw, 0)
+    } else this.player.teleport(3.8, FLOOR_Y, 0.2, -Math.PI / 2, 0)
     setAutosave(true)
     this.mode = 'play'
     this.paused = false

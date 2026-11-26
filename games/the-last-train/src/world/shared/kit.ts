@@ -137,10 +137,10 @@ export function glowMat(color: ColorRepresentation, intensity = 2, map: Texture 
 }
 
 /** 玻璃（物理材质，透射关闭以保证性能，用菲涅尔 + 低透明度） */
-export function glassMat(tint: ColorRepresentation = 0x9fb8c8, opacity = 0.18, rough = 0.05) {
+export function glassMat(tint: ColorRepresentation = 0x9fb8c8, opacity = 0.18, rough = 0.05, side: Side = DoubleSide) {
   return new MeshPhysicalMaterial({
     color: tint, roughness: rough, metalness: 0, transparent: true, opacity, depthWrite: false, envMapIntensity: 1.6,
-    clearcoat: 1, clearcoatRoughness: 0.05, side: DoubleSide,
+    clearcoat: 1, clearcoatRoughness: 0.05, side,
   })
 }
 

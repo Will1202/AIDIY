@@ -59,6 +59,7 @@ export class Museum extends World {
     this.env.fogColor = new Color(0x2a2420)
     this.env.fogDensity = 0.012
     this.env.score = 'museum'
+    this.env.interior = 0.7
     this.env.fx = { exposure: 1.05, bloom: 0.5, bloomThreshold: 1.2, vignette: 0.5, grain: 0.03, saturation: 0.95, contrast: 1.05, tint: new Color(1.03, 1.0, 0.96), lift: new Color(0.02, 0.015, 0.01) }
     this.spawn = { x: 0, y: Y, z: 6, yaw: 0 }
     this.approachLength = 520

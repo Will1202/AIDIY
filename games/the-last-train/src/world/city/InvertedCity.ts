@@ -56,6 +56,7 @@ export class InvertedCity extends World {
     this.env.fogColor = new Color(0xd9b8a4)
     this.env.fogDensity = 0.0045
     this.env.score = 'city'
+    this.env.interior = 0.35
     this.env.fx = { exposure: 1.0, bloom: 0.5, bloomThreshold: 1.25, vignette: 0.38, grain: 0.02, saturation: 1.05, contrast: 1.04, tint: new Color(1.02, 1.0, 0.98), lift: new Color(0.02, 0.015, 0.03) }
     this.spawn = { x: 0, y: Y, z: 6, yaw: 0 }
     this.approachLength = 620
@@ -232,8 +233,10 @@ export class InvertedCity extends World {
     await yieldFrame()
 
     // ---------- 上层倒悬城市（放在可旋转的枢轴组里：驶入时它从云海下翻上来） ----------
-    this.upperPivot.position.set(0, -60, 82)
-    this.upper.position.set(0, 60, -82)
+    // 枢轴放在地平线高度、城市后方：驶入开始时上城被“扶正”立在远处（从车窗平视就能看见），
+    // 随后整座城向上翻起、越过头顶，最终倒挂在 34 米高的天上
+    this.upperPivot.position.set(0, 17, 120)
+    this.upper.position.set(0, -17, -120)
     this.upperPivot.add(this.upper)
     R.add(this.upperPivot)
     const U = this.upper
@@ -367,7 +370,7 @@ export class InvertedCity extends World {
     }
     // 远处的下层城区（装饰）
     const farLower: [number, number, number, number, number, MeshStandardMaterial][] = [
-      [-60, 30, 14, 12, 30, towerA], [-70, 80, 12, 14, 46, towerB], [64, 34, 12, 12, 36, towerC], [70, 90, 14, 10, 28, towerA], [0, 150, 20, 14, 40, towerB], [-40, 150, 12, 12, 52, towerA], [44, 150, 10, 12, 34, towerC],
+      [-60, 30, 14, 12, 30, towerA], [-70, 80, 12, 14, 46, towerB], [64, 34, 12, 12, 36, towerC], [70, 90, 14, 10, 28, towerA], [0, 250, 20, 14, 40, towerB], [-60, 240, 12, 12, 52, towerA], [64, 245, 10, 12, 34, towerC],
     ]
     for (const [x, z, w, d, h, m] of farLower) {
       B.box(m, x, Y + h / 2, z, w, h, d, 0, 4)
@@ -789,16 +792,17 @@ export class InvertedCity extends World {
       this.upperPivot.rotation.x = 0
       return
     }
-    const k = Math.min(1, Math.max(0, (p - 0.18) / 0.66))
+    // 列车开到城市旁边（从车窗正好看得见）时才开始翻转
+    const k = Math.min(1, Math.max(0, (p - 0.4) / 0.55))
     const e = k * k * (3 - 2 * k)
     this.upperPivot.rotation.x = Math.PI * (1 - e)
     this.sky.mat.uniforms.uFlip.value = 1 - e
-    if (p > 0.18 && p < 0.2 && this.arrivalT === 0) {
+    if (p > 0.4 && p < 0.43 && this.arrivalT === 0) {
       this.arrivalT = 1
       this.game.sfx('heavy', undefined, 0.8)
       this.game.say('', '窗外，整座城市正在翻过来。', 4)
     }
-    if (p > 0.6) this.game.moment('invert')
+    if (p > 0.75) this.game.moment('invert')
   }
 
   /** 展映模式强制播放世界倒转 */
@@ -807,7 +811,8 @@ export class InvertedCity extends World {
   /** 展映：车窗视角 */
   momentShots(): Shot[] {
     return [
-      { dur: 22, from: [v3(1.2, 2.4, -0.9), v3(1.0, 2.3, -0.7)], look: [v3(4, 2.2, 8), v3(3, 9, 12)], fov: [62, 58], ease: 'inOut' },
+      // 坐在靠窗的位置，视线从远处的城市一路抬到头顶
+      { dur: 24, from: [v3(0.0, 2.25, 0.55), v3(0.0, 2.1, 0.75)], look: [v3(60, 6, 150), v3(10, 8, 150), v3(0, 40, 140), v3(0, 34, 40)], fov: [70, 78], ease: 'inOut' },
     ]
   }
 }

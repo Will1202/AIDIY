@@ -13,8 +13,9 @@ export class Conductor {
   hat = new Group()
   visible = true
 
-  constructor() {
-    const navy = new MeshStandardMaterial({ color: 0x141c2c, roughness: 0.75, metalness: 0.05 })
+  /** coat：大衣颜色；hat：是否戴帽；hair：头发颜色；lantern：是否提灯（终点里撑伞的人用同一套模型） */
+  constructor(opts: { coat?: number; hat?: boolean; hair?: number; lantern?: boolean } = {}) {
+    const navy = new MeshStandardMaterial({ color: opts.coat ?? 0x141c2c, roughness: 0.75, metalness: 0.05 })
     const navy2 = new MeshStandardMaterial({ color: 0x0e1420, roughness: 0.8 })
     const brass = std({ color: 0xc8a060, rough: 0.3, metal: 1 })
     const skin = std({ color: 0x6a5446, rough: 0.6 })
@@ -58,7 +59,7 @@ export class Conductor {
       arm.add(hand)
       arm.position.set(s * 0.25, 1.46, 0)
       arm.rotation.z = s * 0.1
-      if (s > 0) {
+      if (s > 0 && opts.lantern !== false) {
         arm.rotation.x = -0.25
         // 提灯
         this.lantern.position.set(0, -0.78, 0.02)
@@ -103,6 +104,13 @@ export class Conductor {
     this.hat.add(badge)
     this.hat.position.y = 0.02
     this.head.add(this.hat)
+    // 头发：帽子底下也有（摘帽后露出来——“帽子底下的头发，已经白了”）
+    const hair = new Mesh(new SphereGeometry(0.112, 20, 12, 0, Math.PI * 2, 0, Math.PI * 0.62), std({ color: opts.hair ?? 0xd8d4cc, rough: 0.9 }))
+    hair.scale.set(0.95, 1.05, 1.02)
+    hair.position.set(0, 0.012, -0.012)
+    hair.rotation.x = -0.25
+    this.head.add(hair)
+    if (opts.hat === false) this.hat.visible = false
     this.head.position.y = 1.7
     this.body.add(this.head)
     g.add(this.body)

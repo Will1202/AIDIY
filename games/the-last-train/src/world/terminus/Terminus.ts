@@ -17,6 +17,7 @@ import { makeSky, windowize } from '../shared/sky'
 import { Whale, motes } from '../shared/Whale'
 import { itemModel } from '../shared/itemModels'
 import { FLOOR_Y } from '../shared/Train'
+import { Conductor } from '../shared/Conductor'
 import { S } from '../../state/store'
 import { endingAvailable, loopRequirements } from '../../systems/endings'
 import type { Collider } from '../../physics/collision'
@@ -51,10 +52,11 @@ export class Terminus extends World {
   constructor() {
     super()
     this.env.background = new Color(0x1a2034)
-    this.env.fogColor = new Color(0x6a6a88)
+    this.env.fogColor = new Color(0x4a4a66)
     this.env.fogDensity = 0.0035
     this.env.score = 'terminus'
-    this.env.fx = { exposure: 1.05, bloom: 0.7, bloomThreshold: 1.05, vignette: 0.45, grain: 0.025, saturation: 1.0, contrast: 1.04, tint: new Color(1.0, 0.99, 1.02), lift: new Color(0.02, 0.02, 0.04) }
+    this.env.interior = 0.5
+    this.env.fx = { exposure: 0.95, bloom: 0.6, bloomThreshold: 1.15, vignette: 0.45, grain: 0.025, saturation: 1.0, contrast: 1.04, tint: new Color(1.0, 0.99, 1.02), lift: new Color(0.02, 0.02, 0.04) }
     this.spawn = { x: 0, y: Y, z: 4, yaw: 0 }
     this.approachLength = 900
     this.approachTime = 34
@@ -94,7 +96,7 @@ export class Terminus extends World {
     const brick = std({ color: 0xc8a898, map: TEX.brick(), normalMap: TEX.brickNormal(), rough: 0.85 })
     const wood = std({ color: 0x7a5236, map: TEX.wood(), rough: 0.55 })
 
-    this.sky = makeSky({ top: new Color(0.05, 0.08, 0.2), mid: new Color(1.05, 0.62, 0.52), bottom: new Color(0.3, 0.28, 0.42), sun: new Vector3(0.25, -0.06, -1), sunColor: new Color(2.4, 1.5, 1.0), sunSize: 0.05, stars: 1 })
+    this.sky = makeSky({ top: new Color(0.03, 0.05, 0.15), mid: new Color(0.82, 0.46, 0.44), bottom: new Color(0.18, 0.16, 0.28), sun: new Vector3(0.25, -0.16, -1), sunColor: new Color(1.4, 0.8, 0.5), sunSize: 0.025, stars: 1 })
     R.add(this.sky.mesh)
     // 云海
     const cloudTex = TEX.cloud()
@@ -233,10 +235,26 @@ export class Terminus extends World {
     this.col.slab(GATE_X + 14, 1.9, 28, 0.3, Y, Y + 3, { walkable: false })
     this.col.slab(GATE_X + 14, 9.3, 28, 0.3, Y, Y + 3, { walkable: false })
     this.col.slab(GATE_X + 28.2, 5.6, 0.4, 7, Y, Y + 3, { walkable: false })
-    const glow = new Mesh(new PlaneGeometry(7, 6), new MeshBasicMaterial({ color: new Color(3, 2.4, 1.8) }))
-    glow.position.set(GATE_X + 27.8, 3.8, 5.6)
-    glow.rotation.y = -Math.PI / 2
-    R.add(glow)
+    // 闸机外：晨光里的街。远处一片渐亮的天，街两侧是剪影般的楼
+    const dawnTex = makeTex('dawnSky', 128, (_u, v) => {
+      const k = 1 - v
+      return [1.0 * (0.55 + k * 0.45), 0.62 + k * 0.3, 0.55 + k * 0.1]
+    })
+    const dawn = new Mesh(new PlaneGeometry(60, 40), new MeshBasicMaterial({ map: dawnTex, color: new Color(2.2, 1.9, 1.7), fog: false }))
+    dawn.position.set(GATE_X + 60, 12, 5.6)
+    dawn.rotation.y = -Math.PI / 2
+    R.add(dawn)
+    const sil = std({ color: 0x2a2630, rough: 0.9 })
+    for (let i = 0; i < 12; i++) {
+      const side = i % 2 ? 1 : -1
+      const h = 6 + Math.random() * 14
+      B.box(sil, GATE_X + 8 + Math.floor(i / 2) * 7, Y + h / 2, 5.6 + side * (6 + Math.random() * 3), 6, h, 4)
+    }
+    for (let i = 0; i < 6; i++) {
+      const lamp = new Mesh(new SphereGeometry(0.1, 8, 6), glowMat(0xffd8a0, 4 - i * 0.5))
+      lamp.position.set(GATE_X + 6 + i * 4, Y + 3.2, i % 2 ? 2.6 : 8.6)
+      R.add(lamp)
+    }
 
     // ---------- 驾驶室里的帽子 ----------
     this.cap = itemModel('cap', '#1c2638') as Group
@@ -246,16 +264,17 @@ export class Terminus extends World {
 
     // ---------- 撑红伞的人（只在打破循环的结局里出现） ----------
     this.umbrellaFigure = new Group()
-    const body = new Mesh(new CylinderGeometry(0.2, 0.28, 1.5, 16), std({ color: 0x2a2a30, rough: 0.8 }))
-    body.position.y = 0.75
-    const head = new Mesh(new SphereGeometry(0.11, 16, 12), std({ color: 0x3a3030, rough: 0.7 }))
-    head.position.y = 1.62
+    // 等你的人：同一套人物模型，深红色大衣，不戴帽子，撑着那把红伞
+    const waiting = new Conductor({ coat: 0x4a2a2a, hat: false, hair: 0x2a2220, lantern: false })
+    waiting.group.rotation.y = 0
+    this.umbrellaFigure.add(waiting.group)
     const umb = itemModel('umbrella', '#b33a32')
-    umb.rotation.z = 0
-    umb.position.set(0.1, 1.7, 0)
+    umb.rotation.z = 0.12
+    umb.position.set(0.18, 1.55, 0.05)
     umb.scale.setScalar(1.1)
-    this.umbrellaFigure.add(body, head, umb)
+    this.umbrellaFigure.add(umb)
     this.umbrellaFigure.position.set(-8, Y, 5)
+    this.umbrellaFigure.rotation.y = Math.PI / 2
     this.umbrellaFigure.visible = false
     R.add(this.umbrellaFigure)
 
@@ -479,9 +498,10 @@ export class Terminus extends World {
     // 日出（打破循环的结局）
     this.sunrise += (this.sunTarget - this.sunrise) * (1 - Math.exp(-dt * 0.35))
     const su = this.sky.mat.uniforms
-    ;(su.uSun.value as Vector3).set(0.25, -0.06 + this.sunrise * 0.3, -1).normalize()
+    ;(su.uSun.value as Vector3).set(0.25, -0.16 + this.sunrise * 0.4, -1).normalize()
     ;(su.uTop.value as Color).setRGB(0.05 + this.sunrise * 0.25, 0.08 + this.sunrise * 0.35, 0.2 + this.sunrise * 0.45)
     su.uStars.value = 1 - this.sunrise
+    ;(su.uSunCol.value as Color).setRGB(1.4 + this.sunrise * 1.8, 0.8 + this.sunrise * 1.3, 0.5 + this.sunrise * 0.8)
     su.uTime.value = t
     this.sun.intensity = 1.2 + this.sunrise * 3
     // 环轨断开
@@ -565,15 +585,16 @@ export class Terminus extends World {
     cond.place(this.root, 2, Y, 4.6, -Math.PI / 2)
     cond.hat.visible = false
     const train = g.train
-    let x = 0
+    let tt = 0
     void g.cinematic([
       { dur: 4, from: [v3(15.2, 2.7, 0.2)], look: [v3(30, 2.6, 0)], fov: [62, 60], start: () => train.setDoors(false) },
       {
         dur: 9, from: [v3(-6, 2.2, 6.5), v3(-14, 2.6, 7.5)], look: [v3(2, 2, 4.6), v3(12, 2.4, 2)], ease: 'inOut', fov: [50, 44],
         tick: (_p, dt) => {
-          x += dt * dt * 30 + dt * 2
-          train.group.position.x = x
-          train.externalSpeed = 4 + x * 0.3
+          // 匀加速出站：9 秒后约 120 米、速度约 27 m/s
+          tt += dt
+          train.group.position.x = 1.5 * tt * tt
+          train.externalSpeed = 3 * tt
         },
       },
       { dur: 3, from: [v3(-14, 2.6, 7.5)], look: [v3(30, 2.4, 2)], start: () => g.setFade(1) },
@@ -624,7 +645,11 @@ export class Terminus extends World {
   }
 
   momentShots(): Shot[] {
-    return [{ dur: 30, from: [v3(1.2, 2.4, -0.9), v3(1.0, 2.5, -0.8)], look: [v3(6, 4, 12), v3(-4, 8, 12)], fov: [66, 60], ease: 'inOut' }]
+    // 先朝环心一侧的车窗看出去（之前的世界都围在环里），到站时转回站台：终点就是零号站台
+    return [
+      { dur: 22, from: [v3(0.0, 2.2, -0.4), v3(0.0, 2.15, -0.5)], look: [v3(-60, 18, -150), v3(0, 30, -160), v3(60, 22, -150)], fov: [74, 80], ease: 'inOut' },
+      { dur: 9, from: [v3(0.0, 2.15, -0.5), v3(0.2, 2.3, 0.3)], look: [v3(30, 10, -100), v3(0, 3, 20)], fov: [80, 62], ease: 'inOut' },
+    ]
   }
 }
 

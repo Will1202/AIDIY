@@ -1,7 +1,7 @@
 // 末班 0000 次：机车 + 可进入的客车车厢 + 一节熄灯的尾车。程序化建模，贯穿全部世界。
 // 车厢坐标：地板 y = 1.0，内部 x ∈ [-10, 10]，z ∈ [-1.4, 1.4]，车门在 +Z 一侧 x = ±5.5。
 import {
-  AdditiveBlending, ShaderMaterial, Vector2, BufferGeometry, Float32BufferAttribute, CylinderGeometry, DoubleSide, ExtrudeGeometry, Group, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry,
+  AdditiveBlending, InstancedMesh, Matrix4, ShaderMaterial, Vector2, BufferGeometry, Float32BufferAttribute, CylinderGeometry, DoubleSide, ExtrudeGeometry, Group, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry,
   PointLight, Shape, SphereGeometry, SpotLight, type Material,
 } from 'three'
 import { CollisionWorld, type Collider } from '../../physics/collision'
@@ -100,7 +100,10 @@ export class Train {
   /** 过场里由世界直接驱动列车时的声音参数 */
   externalSpeed = 0
   externalBraking = false
-  private wheels: Mesh[] = []
+  /** 24 个车轮合成一次实例化绘制 */
+  private wheels!: InstancedMesh
+  private wheelPos: [number, number][] = []
+  private wheelAng = 0
 
   constructor(readonly q: QualityPreset) {}
 
@@ -119,7 +122,8 @@ export class Train {
     const woodM = std({ color: 0x6b4a32, rough: 0.45, map: TEX.wood() })
     const seatM = std({ color: 0xffffff, rough: 0.9, map: TEX.fabric() })
     const chrome = std({ color: 0xd8dde2, rough: 0.18, metal: 1 })
-    const glass = glassMat(0xa8c0d0, 0.14)
+    const glass = glassMat(0xa8c0d0, 0.12)
+    glass.envMapIntensity = 0.9
     this.lampMat = glowMat(0xffe3b0, 3)
     this.windowGlowMat = glowMat(0xffc884, 0.0)
     this.tailWinMat = new MeshStandardMaterial({ color: 0x05070a, emissive: 0x18202c, emissiveIntensity: 0.6, roughness: 0.15, metalness: 0.2 })
@@ -397,13 +401,12 @@ export class Train {
     const wheelMat = std({ color: 0x2a2c30, rough: 0.4, metal: 0.9 })
     for (const bx of [-28, -14.4, -7.5, 7.5, 13, 22.5]) {
       B.box(under, bx, 0.62, 0, 2.6, 0.3, 2.2)
-      for (const ax of [-0.85, 0.85]) for (const z of [-0.78, 0.78]) {
-        const w = new Mesh(wheelGeo, wheelMat)
-        w.position.set(bx + ax, 0.46, z)
-        g.add(w)
-        this.wheels.push(w)
-      }
+      for (const ax of [-0.85, 0.85]) for (const z of [-0.78, 0.78]) this.wheelPos.push([bx + ax, z])
     }
+    this.wheels = new InstancedMesh(wheelGeo, wheelMat, this.wheelPos.length)
+    this.wheels.castShadow = true
+    g.add(this.wheels)
+    this.updateWheels()
 
     // ---------- 车厢灯光（两盏暖光点光源，不投影） ----------
     for (const x of [-5, 5]) {
@@ -560,6 +563,9 @@ export class Train {
     this.doorTarget = open ? 1 : 0
   }
 
+  /** 由世界决定的车厢灯光倍率 */
+  interiorScale = 1
+
   setInterior(on: number) {
     this.interiorTarget = on
   }
@@ -602,14 +608,25 @@ export class Train {
     let flicker = 1
     if (this.interiorTarget > 0.5 && this.interior < 0.98) flicker = 0.6 + 0.4 * Math.sin(t * 47) * Math.sin(t * 13)
     const lv = Math.max(0, this.interior * flicker)
-    for (const l of this.lights) l.intensity = 22 * lv
-    this.lampMat.emissiveIntensity = 3 * lv
+    for (const l of this.lights) l.intensity = 22 * lv * this.interiorScale
+    this.lampMat.emissiveIntensity = 3 * lv * (0.5 + this.interiorScale * 0.5)
     this.flick += dt
     this.windowGlowMat.emissive.setRGB(1, 0.78, 0.52)
     this.windowGlowMat.emissiveIntensity = 0.9 * lv
     // 车轮
-    const ang = (this.speed * dt) / 0.46
-    for (const w of this.wheels) w.rotation.z -= ang
+    if (this.speed > 0.01) {
+      this.wheelAng -= (this.speed * dt) / 0.46
+      this.updateWheels()
+    }
+  }
+
+  private updateWheels() {
+    const m = new Matrix4()
+    this.wheelPos.forEach(([x, z], i) => {
+      m.makeRotationZ(this.wheelAng).setPosition(x, 0.46, z)
+      this.wheels.setMatrixAt(i, m)
+    })
+    this.wheels.instanceMatrix.needsUpdate = true
   }
 
   /** 车厢里的位置是否在车门口区域 */

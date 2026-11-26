@@ -201,7 +201,8 @@ export class Game implements GameApi {
       this.target = null
       setUI({ prompt: null })
     }
-    return this.director.play(shots, opts)
+    setUI({ cutscene: true })
+    return this.director.play(shots, opts).finally(() => setUI({ cutscene: false }))
   }
   moment(id: MomentId) {
     Meta.seeMoment(id)
@@ -236,6 +237,8 @@ export class Game implements GameApi {
       throw e
     }
     this.renderer = renderer
+    // 统计整帧（含反射、阴影、后期）的绘制量：每帧开始时手动清零
+    renderer.info.autoReset = false
     this.qLevel = settings.quality ?? guessQuality(renderer.getContext() as WebGL2RenderingContext)
     this.q = QUALITY[this.qLevel]
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.q.maxPixelRatio))
@@ -420,6 +423,7 @@ export class Game implements GameApi {
     this.scene.environment = this.envTex
     this.audio.setScore(e.score)
     this.transit.setColor(WORLDS[w.id].accent)
+    this.train.interiorScale = e.interior ?? 1
   }
 
   private placeConductor() {
@@ -648,7 +652,8 @@ export class Game implements GameApi {
         this.trainSpeed = (L * p * Math.pow(1 - u, p - 1)) / T
         this.placeRoot(w, this.s)
         const fog = this.scene.fog as FogExp2
-        const k = Math.min(1, u / 0.45)
+        // 雾在驶入的前 22% 就散开，好让窗外的标志性时刻看得清
+        const k = Math.min(1, u / 0.22)
         fog.density = 0.045 + (w.env.fogDensity - 0.045) * (1 - Math.pow(1 - k, 2))
         this.transit.visible = Math.max(0, 1 - u * 3)
         this.transit.speed = this.trainSpeed
@@ -1172,6 +1177,7 @@ export class Game implements GameApi {
   // ---------------- 主循环 ----------------
   frame(dt: number) {
     if (!this.renderer) return
+    this.renderer.info.reset()
     this.time += dt
     const playing = this.mode === 'play' && !this.paused
     const frozen = this.photo.active

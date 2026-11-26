@@ -50,6 +50,8 @@ export interface WorldEnv {
   score: WorldId | 'none'
   /** 0..1：声音是否“通透”（深海里会闷） */
   openness: number
+  /** 车厢灯光倍率：白天的世界里车厢灯要暗一些，否则车内过曝 */
+  interior?: number
 }
 
 export abstract class World {

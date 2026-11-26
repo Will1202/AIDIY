@@ -15,6 +15,7 @@ export default function App() {
   const loadingText = useUI((s) => s.loadingText)
   const locked = useUI((s) => s.pointerLocked)
   const touch = useUI((s) => s.touch)
+  const cutscene = useUI((s) => s.cutscene || !!s.showcase)
   const modal = useUI((s) => !!(s.dialogue || s.reading || s.keypad || s.sonar || s.radio || s.photo))
   useEffect(() => {
     const c = canvasRef.current
@@ -35,7 +36,7 @@ export default function App() {
       )}
       {screen === 'menu' && <Menu />}
       {(screen === 'play' || screen === 'pause') && <HUD />}
-      {screen === 'play' && !locked && !touch && !modal && <div className="clickToPlay" onClick={() => game.lock()}><span>点击画面继续</span></div>}
+      {screen === 'play' && !locked && !touch && !modal && !cutscene && <div className="clickToPlay" onClick={() => game.lock()}><span>点击画面继续</span></div>}
       {screen === 'pause' && <Pause />}
       <div className="ui">
         <div className="live"><DialogueBox /></div>

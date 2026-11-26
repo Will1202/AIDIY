@@ -69,13 +69,15 @@ export interface UIState {
   pointerLocked: boolean
   /** 移动端：是否显示虚拟按键 */
   saveFlash: number
+  /** 正在播放过场（隐藏“点击画面继续”等） */
+  cutscene: boolean
 }
 
 export const uiStore = createStore<UIState>(() => ({
   screen: 'boot', menuPanel: null, pauseTab: 'journal', hasSave: false, loadingText: '', prompt: null, promptAt: null, toasts: [], subtitles: [],
   dialogue: null, reading: null, inspecting: null, keypad: null, sonar: false, radio: false, manipulate: null, cinema: false, photo: false,
   letterbox: false, fps: 0, world: 'station', ending: null, endingLines: [], showcase: null, timeHud: null, hint: null, chapterCard: null,
-  touch: false, pointerLocked: false, saveFlash: 0,
+  touch: false, pointerLocked: false, saveFlash: 0, cutscene: false,
 }))
 
 export const useUI = <T,>(sel: (s: UIState) => T) => useStore(uiStore, sel)

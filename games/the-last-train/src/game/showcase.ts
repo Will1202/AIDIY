@@ -23,6 +23,7 @@ export async function playMoment(game: Game, id: MomentId) {
   switch (id) {
     case 'rain': {
       await g.loadWorld('station')
+      setUI({ screen: 'play', cinema: true })
       g.mode = 'play'
       g.paused = false
       const st = game.world as unknown as { intro(): Promise<void> }
@@ -34,6 +35,7 @@ export async function playMoment(game: Game, id: MomentId) {
     case 'reversal': {
       const w = id === 'invert' ? 'city' : id === 'whale' ? 'abyss' : 'terminus'
       await g.loadWorld(w)
+      setUI({ screen: 'play', cinema: true })
       g.mode = 'play'
       g.paused = false
       const world = g.world!
@@ -46,6 +48,7 @@ export async function playMoment(game: Game, id: MomentId) {
     }
     case 'freeze': {
       await g.loadWorld('desert')
+      setUI({ screen: 'play', cinema: true })
       g.mode = 'play'
       g.paused = false
       game.player.teleport(0, 1, 9.6, Math.PI, 0)

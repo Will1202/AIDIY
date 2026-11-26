@@ -2,12 +2,12 @@
 // 暴雨、积水倒影、远处闪电、雨棚下的灯、移动的雾。开场电影镜头：列车从雨雾里驶入零号站台。
 // 谜题：车票 → 故障电子钟（23:59 闪现）+ 告示 → 储物柜密码 → 检票钳 → 组合检票 → 列车长 → 登车。
 import {
-  AdditiveBlending, BackSide, Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh,
+  AdditiveBlending, BackSide, BufferGeometry, Color, Float32BufferAttribute, Points, PointsMaterial, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh,
   MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, SpotLight, Vector3, Vector4,
   type PerspectiveCamera, type WebGLRenderer,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, glassMat, glowMat, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glassMat, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX } from '../shared/textures'
 import { DigitScreen, textTexture, DISPLAY, MONO } from '../shared/text'
 import { Rain } from '../shared/Rain'
@@ -177,11 +177,8 @@ export class Station extends World {
     // 对面挡土墙
     B.box(darkConcrete, 0, 1.4, -6.2, 900, 3.6, 0.8, 0, 3)
     // 挡土墙上的检修灯（只有自发光，给黑暗里一点节奏）
-    for (let x = -420; x <= 420; x += 28) {
-      const wl = new Mesh(new SphereGeometry(0.09, 8, 6), glowMat(0xffb070, 14))
-      wl.position.set(x, 2.6, -5.75)
-      R.add(wl)
-    }
+    const wallLamp = glowMat(0xffb070, 14)
+    for (let x = -420; x <= 420; x += 28) B.add(new SphereGeometry(0.09, 8, 6), wallLamp, trs(x, 2.6, -5.75), false, false)
     B.box(rust, 0, 0.1, -4.6, 900, 0.4, 2.6, 0, 2)
     // 对面墙上的旧海报
     const posters = ['澄川北站 · 欢迎回家', '零号线 · 末班 23:59', '请勿在站台奔跑', '雨天路滑 · 注意安全', '寻人：如果你看见这张海报，请回家']
@@ -201,6 +198,7 @@ export class Station extends World {
     B.box(iron, 0, CANOPY.y + 0.0, CANOPY.z0, cw, 0.35, 0.12)
     B.box(iron, 0, CANOPY.y - 0.2, CANOPY.z0 + 0.06, cw, 0.06, 0.06)
     // 桁架 + 铸铁柱
+    const plateMat = new MeshStandardMaterial({ map: textTexture({ w: 256, h: 256, bg: '#e8e0cc', lines: [{ text: '0', size: 0.7, color: '#1a1e24', font: DISPLAY, y: 0.52, weight: '600' }] }), roughness: 0.5 })
     for (let x = CANOPY.x0 + 2; x <= CANOPY.x1 - 2; x += 8) {
       B.box(iron, x, CANOPY.y - 0.18, (CANOPY.z0 + CANOPY.z1) / 2, 0.14, 0.3, CANOPY.z1 - CANOPY.z0)
       B.boxR(iron, x, CANOPY.y - 0.75, 3.6, 0.1, 1.6, 0.1, 0.6, 0, 0)
@@ -210,15 +208,8 @@ export class Station extends World {
       B.cyl(iron, x, CANOPY.y - 0.35, 4.2, 0.12, 0.3, 14, 0.24)
       this.col.cyl(x, 4.2, 0.24, PLAT_Y, CANOPY.y, { surface: 'metal' })
       // 柱上的站台号
-      const plate = textTexture({ w: 256, h: 256, bg: '#e8e0cc', lines: [{ text: '0', size: 0.7, color: '#1a1e24', font: DISPLAY, y: 0.52, weight: '600' }] })
-      const pl = new Mesh(new PlaneGeometry(0.34, 0.34), new MeshStandardMaterial({ map: plate, roughness: 0.5 }))
-      pl.position.set(x, PLAT_Y + 2.1, 4.2 - 0.14)
-      pl.rotation.y = Math.PI
-      R.add(pl)
-      const pl2 = pl.clone()
-      pl2.position.z = 4.2 + 0.14
-      pl2.rotation.y = 0
-      R.add(pl2)
+      B.add(new PlaneGeometry(0.34, 0.34), plateMat, trs(x, PLAT_Y + 2.1, 4.2 - 0.14, 0, Math.PI, 0), false)
+      B.add(new PlaneGeometry(0.34, 0.34), plateMat, trs(x, PLAT_Y + 2.1, 4.2 + 0.14), false)
     }
     await yieldFrame()
 
@@ -345,10 +336,9 @@ export class Station extends World {
     this.col.slab(17, 8.75, 1.15, 0.85, PLAT_Y, PLAT_Y + 1.95, { tag: 'vend', surface: 'metal' })
 
     // ---------- 雨棚下的吊灯 ----------
+    const shadeMat = std({ color: 0x1a2a24, rough: 0.5, metal: 0.6, side: DoubleSide })
     const bulb = (x: number, y: number, z: number, light: boolean) => {
-      const shade = new Mesh(new CylinderGeometry(0.12, 0.38, 0.28, 20, 1, true), std({ color: 0x1a2a24, rough: 0.5, metal: 0.6, side: DoubleSide }))
-      shade.position.set(x, y + 0.1, z)
-      R.add(shade)
+      B.add(new CylinderGeometry(0.12, 0.38, 0.28, 20, 1, true), shadeMat, trs(x, y + 0.1, z), false)
       const bm = glowMat(0xffd59a, 8)
       this.bulbMats.push(bm)
       const b = new Mesh(new SphereGeometry(0.09, 12, 8), bm)
@@ -551,17 +541,25 @@ export class Station extends World {
     const dome = new Mesh(new SphereGeometry(1200, 32, 16), this.sky)
     dome.renderOrder = -1
     R.add(dome)
-    // 远处城市灯火
-    const cityG = new Group()
-    for (let i = 0; i < 90; i++) {
-      const a = (Math.random() - 0.5) * Math.PI * 1.4 - Math.PI / 2
-      const r = 280 + Math.random() * 300
-      const s = new Mesh(new PlaneGeometry(1.5, 1.5), new MeshBasicMaterial({ color: new Color().setHSL(0.08 + Math.random() * 0.05, 0.6, 0.6), transparent: true, opacity: 0.5, blending: AdditiveBlending, depthWrite: false }))
-      s.position.set(Math.cos(a) * r, 2 + Math.random() * 30, Math.sin(a) * r - 50)
-      s.lookAt(0, 3, 0)
-      cityG.add(s)
+    // 远处城市灯火：一次绘制的点精灵
+    {
+      const n = 120
+      const pos = new Float32Array(n * 3), col = new Float32Array(n * 3)
+      const c = new Color()
+      for (let i = 0; i < n; i++) {
+        const a = (Math.random() - 0.5) * Math.PI * 1.4 - Math.PI / 2
+        const r = 280 + Math.random() * 300
+        pos.set([Math.cos(a) * r, 2 + Math.random() * 30, Math.sin(a) * r - 50], i * 3)
+        c.setHSL(0.07 + Math.random() * 0.06, 0.65, 0.35 + Math.random() * 0.3)
+        col.set([c.r, c.g, c.b], i * 3)
+      }
+      const g = new BufferGeometry()
+      g.setAttribute('position', new Float32BufferAttribute(pos, 3))
+      g.setAttribute('color', new Float32BufferAttribute(col, 3))
+      const pts = new Points(g, new PointsMaterial({ size: 3.2, map: TEX.glow(), vertexColors: true, transparent: true, depthWrite: false, blending: AdditiveBlending, sizeAttenuation: true }))
+      pts.frustumCulled = false
+      R.add(pts)
     }
-    R.add(cityG)
     // 信号灯
     for (const [x, col] of [[120, 0xff2a1a], [-150, 0x2aff6a], [260, 0xff2a1a]] as [number, number][]) {
       B.cyl(iron, x, 2.5, -2.4, 0.08, 5, 8)
@@ -967,7 +965,7 @@ export class Station extends World {
     }
     const shots: Shot[] = [
       {
-        dur: 7, from: [v3(-58, 4.6, 0.6), v3(-62, 3.6, 0.4)], look: [v3(-220, 1.0, 0), v3(-210, 1.6, 0)], fov: [42, 36], ease: 'linear',
+        dur: 7, from: [v3(-46, 3.0, 6.2), v3(-50, 2.6, 5.4)], look: [v3(-200, 1.2, 1.5), v3(-190, 1.8, 0.5)], fov: [44, 38], ease: 'linear',
         start: () => {
           g.setFade(0)
           g.say('', '00:00', 3)

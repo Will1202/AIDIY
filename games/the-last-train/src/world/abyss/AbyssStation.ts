@@ -102,7 +102,8 @@ export class AbyssStation extends World {
     const sand = std({ color: 0x4a5a5a, map: TEX.sand(), normalMap: TEX.sandNormal(), rough: 1 })
     const rock = std({ color: 0x2e3a40, map: TEX.stone(), normalMap: TEX.stoneNormal(), rough: 0.95 })
     const ruinM = std({ color: 0x5a6a6a, map: TEX.stone(), normalMap: TEX.stoneNormal(), rough: 0.9 })
-    const glass = glassMat(0x6ab8d0, 0.12, 0.02)
+    // 玩家总在隧道 / 穹顶里面：只画内侧面，避免双面透明叠加的满屏开销
+    const glass = glassMat(0x6ab8d0, 0.12, 0.02, BackSide)
 
     // ---------- 海底 ----------
     const seabed = new PlaneGeometry(1400, 900, 140, 90)
@@ -446,17 +447,21 @@ export class AbyssStation extends World {
     // 体积光：从海面斜射下来的光柱
     const rayMat = new ShaderMaterial({
       uniforms: { uTime: { value: 0 } },
-      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-      fragmentShader: `uniform float uTime; varying vec2 vUv;
-        void main(){ float x = vUv.x; float a = smoothstep(0.0, 0.3, x) * smoothstep(1.0, 0.7, x) * smoothstep(0.0, 0.6, vUv.y);
+      vertexShader: `varying vec2 vUv; varying vec3 vW; void main(){ vUv = uv; vec4 w = modelMatrix * vec4(position,1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }`,
+      fragmentShader: `uniform float uTime; varying vec2 vUv; varying vec3 vW;
+        void main(){ float x = vUv.x; float a = smoothstep(0.0, 0.4, x) * smoothstep(1.0, 0.6, x) * smoothstep(0.0, 0.7, vUv.y);
         a *= 0.5 + 0.5 * sin(x * 12.0 + uTime * 0.3) * sin(x * 5.0 - uTime * 0.2);
-        gl_FragColor = vec4(vec3(0.3, 0.65, 0.8) * a * 0.12, 1.0); }`,
+        // 离镜头太近的光柱会变成一整片发白的面，按距离淡出
+        a *= smoothstep(14.0, 40.0, distance(cameraPosition, vW));
+        gl_FragColor = vec4(vec3(0.3, 0.65, 0.8) * a * 0.1, 1.0); }`,
       blending: AdditiveBlending, transparent: true, depthWrite: false, side: DoubleSide,
     })
-    for (let i = 0; i < 7; i++) {
-      const ray = new Mesh(new PlaneGeometry(16 + Math.random() * 10, 120), rayMat)
-      ray.position.set(-60 + i * 22, 40, 40 + Math.random() * 60)
-      ray.rotation.set(0, Math.random() * Math.PI, 0.25)
+    for (let i = 0; i < 6; i++) {
+      const ra = (i / 6) * Math.PI * 2 + 0.4
+      const ray = new Mesh(new PlaneGeometry(12 + Math.random() * 8, 120), rayMat)
+      ray.position.set(Math.cos(ra) * (50 + Math.random() * 30), 40, DOME.z + 30 + Math.sin(ra) * (40 + Math.random() * 25))
+      ray.lookAt(DOME.x, 40, DOME.z)
+      ray.rotateZ(0.22)
       this.rays.push(ray)
       R.add(ray)
     }
@@ -879,8 +884,9 @@ export class AbyssStation extends World {
       }
       // 鲸在列车 +z 侧，相对列车从前往后缓慢游过
       const k = (p - 0.3) / 0.5
-      const rel = 70 - k * 150
-      this.whale.group.position.set(s + rel, 6 + Math.sin(k * 3) * 1.5, 16)
+      const rel = 60 - k * 130
+      // 鲸的身体正对车窗高度（窗户在 1.85–2.85 m），离车窗约 11 米
+      this.whale.group.position.set(s + rel, 2.6 + Math.sin(k * 3) * 0.8, 12.5)
       this.whale.group.rotation.set(0, Math.PI, 0)
       this.whale.glow = 1.6
       this.jelly2.mat.uniforms.uBoost.value = Math.max(0, 1 - Math.abs(k - 0.5) * 2)
@@ -908,7 +914,7 @@ export class AbyssStation extends World {
   }
 
   momentShots(): Shot[] {
-    return [{ dur: 24, from: [v3(-1.5, 2.3, -0.9), v3(1.5, 2.3, -0.9)], look: [v3(2, 2.6, 10), v3(-2, 3, 10)], fov: [64, 60], ease: 'linear' }]
+    return [{ dur: 24, from: [v3(-1.5, 2.1, -0.7), v3(1.5, 2.1, -0.7)], look: [v3(4, 2.4, 12), v3(-4, 2.6, 12)], fov: [70, 64], ease: 'linear' }]
   }
 }
 

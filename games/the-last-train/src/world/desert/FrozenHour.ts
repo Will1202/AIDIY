@@ -73,6 +73,7 @@ export class FrozenHour extends World {
     this.env.fogColor = new Color(0xc8906a)
     this.env.fogDensity = 0.0055
     this.env.score = 'desert'
+    this.env.interior = 0.45
     this.env.fx = { exposure: 1.0, bloom: 0.55, bloomThreshold: 1.15, vignette: 0.45, grain: 0.03, saturation: 1.02, contrast: 1.06, tint: new Color(1.03, 0.99, 0.94), lift: new Color(0.03, 0.015, 0.03) }
     this.spawn = { x: 0, y: Y, z: 5, yaw: 0 }
     this.approachLength = 560

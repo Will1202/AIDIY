@@ -13,7 +13,8 @@
     "bench": "npm run build && node scripts/browser/bench.cjs dist .shots/bench MEDIUM HIGH",
     "e2e": "npm run build && node scripts/browser/journey.cjs dist .shots/journey",
     "e2e:scenes": "npm run build && node scripts/browser/scenes.cjs dist .shots/scenes",
-    "e2e:audio": "npm run build && node scripts/browser/audio.cjs dist"
+    "e2e:audio": "npm run build && node scripts/browser/audio.cjs dist",
+    "e2e:tour": "npm run build && node scripts/browser/tour.cjs dist .shots/tour"
   },
   "dependencies": {
     "@fontsource-variable/geist-mono": "^5.3.0",

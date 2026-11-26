@@ -8,10 +8,10 @@
 //   穿过镜子 —— 镜中世界：第一张车票、列车长人事档案、第四枚碎片
 import {
   AdditiveBlending, BoxGeometry, Color, CylinderGeometry, DirectionalLight, DoubleSide, Float32BufferAttribute, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh,
-  MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, SphereGeometry, SpotLight, TorusGeometry, Vector3,
+  MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, RingGeometry, Scene, SphereGeometry, SpotLight, TorusGeometry, Vector3,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, glowMat, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX, fbm, makeTex } from '../shared/textures'
 import { textTexture, MONO } from '../shared/text'
 import { itemModel } from '../shared/itemModels'
@@ -89,11 +89,23 @@ export class Museum extends World {
     const velvet = std({ color: 0x6a1a1c, rough: 1 })
     const wood = std({ color: 0x4a2e1e, map: TEX.wood(), rough: 0.5 })
     const glass = new MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.03, transparent: true, opacity: 0.12, depthWrite: false, clearcoat: 1, envMapIntensity: 2 })
+    this.tm = {
+      dado,
+      panel: std({ color: 0x5a3a26, map: TEX.wood(), rough: 0.45 }),
+      gold,
+      base: std({ color: 0x1c1410, rough: 0.5 }),
+      cornice: std({ color: 0xf4ecdc, map: TEX.plaster(), rough: 0.85 }),
+    }
 
     // ---------- 站台 + 长廊展厅 ----------
     B.box(marble, 0, Y - 0.5, 7.8, 70, 1, 12.4, 0, 3)
     this.col.slab(0, 7.8, 70, 12.4, -2, Y, { surface: 'marble', tag: 'hall' })
-    B.box(wall, 0, 4, 14.2, 70, 6, 0.4, 0, 3)
+    // 后墙：中间留出通往圆厅的门洞（碰撞体本来就有这个开口，之前画面上却是一整面墙）
+    for (const sx of [-1, 1]) B.box(wall, sx * 18.25, 4, 14.2, 33.5, 6, 0.4, 0, 3)
+    B.box(wall, 0, 6.1, 14.2, 3, 1.8, 0.4)
+    B.box(wall, 0, 5.4, 15, 3.4, 0.4, 2.2)
+    for (const sx of [-1, 1]) B.box(gold, sx * 1.6, Y + 2.1, 13.97, 0.18, 4.2, 0.1)
+    B.box(gold, 0, Y + 4.27, 13.97, 3.38, 0.14, 0.1)
     B.box(wall, 0, 7.2, 9, 70, 0.4, 10.8)
     for (const [a, b] of [[-35, -1.5], [1.5, 35]] as [number, number][]) this.col.slab((a + b) / 2, 14.2, b - a, 0.4, Y, 7, { walkable: false })
     this.col.slab(-35, 8, 0.4, 12.4, Y, 7, { walkable: false })
@@ -159,6 +171,29 @@ export class Museum extends World {
       this.col.cyl(x, 12.6, 0.08, Y, Y + 0.9, { walkable: false })
     }
     for (let x = -30; x <= 30; x += 4) if (Math.abs(x) > 3) B.box(velvet, x, Y + 0.8, 12.6, 3.9, 0.05, 0.05)
+    // 长廊墙裙、檐口与藻井梁
+    this.wainscot(B, 'x', 14.0, -1, -34.8, -1.5)
+    this.wainscot(B, 'x', 14.0, -1, 1.5, 34.8)
+    for (let x = -32.5; x <= 32.5; x += 5) {
+      B.box(dado, x, 6.86, 9, 0.32, 0.28, 10.6)
+      B.box(gold, x, 6.71, 9, 0.34, 0.03, 10.6)
+    }
+    B.box(dado, 0, 6.86, 4.0, 70, 0.28, 0.32)
+    // 吊灯：黄铜灯罩 + 暖色灯泡（与画作射灯一起照亮长廊）
+    const bulb = glowMat(0xffd6a0, 5)
+    for (const x of [-27.5, -17.5, -7.5, 7.5, 17.5, 27.5]) {
+      B.cyl(gold, x, 6.1, 9, 0.012, 1.5, 6)
+      B.cyl(gold, x, 5.28, 9, 0.42, 0.22, 20, 0.12)
+      B.add(new SphereGeometry(0.13, 12, 8), bulb, trs(x, 5.12, 9))
+    }
+    // 观画长凳（皮面 + 木腿），背对列车、面向画墙
+    const leather = std({ color: 0x3a1a14, rough: 0.55 })
+    for (const x of [-27, -11, 11, 27]) {
+      B.box(leather, x, Y + 0.44, 7.6, 2.0, 0.1, 0.55)
+      B.box(dado, x, Y + 0.36, 7.6, 2.04, 0.06, 0.59)
+      for (const dx of [-0.85, 0.85]) B.box(dado, x + dx, Y + 0.17, 7.6, 0.12, 0.34, 0.45)
+      this.col.slab(x, 7.6, 2.04, 0.59, Y, Y + 0.5, { surface: 'wood', tag: 'bench' })
+    }
     await yieldFrame()
 
     // ---------- 圆厅 ----------
@@ -235,6 +270,33 @@ export class Museum extends World {
     doorSign.position.set(0, Y + 5.6, ROT.z + ROT.r - 0.2)
     doorSign.rotation.y = Math.PI
     R.add(doorSign)
+    // 门框、门板浮雕与壁灯
+    for (const x of [-1.75, 1.75]) B.box(gold, x, Y + 2.7, ROT.z + ROT.r - 0.25, 0.22, 5.4, 0.16)
+    B.box(gold, 0, Y + 5.42, ROT.z + ROT.r - 0.25, 3.72, 0.24, 0.16)
+    const panelMat = std({ color: 0x5a3a26, map: TEX.wood(), rough: 0.45 })
+    for (const px of [-0.75, 0.75]) for (const py of [-1.3, 1.1]) {
+      const pn = new Mesh(boxGeo(1.1, py < 0 ? 1.9 : 2.3, 0.06), panelMat)
+      pn.position.set(px, py, -0.17)
+      this.curatorDoor.add(pn)
+    }
+    const emblem = new Mesh(new TorusGeometry(0.42, 0.045, 8, 40), gold)
+    emblem.position.set(0, 0.1, -0.2)
+    this.curatorDoor.add(emblem)
+    const sconceGlow = glowMat(0xffd6a0, 6)
+    for (const x of [-2.5, 2.5]) {
+      const sz = ROT.z + Math.sqrt(ROT.r * ROT.r - x * x) - 0.32
+      B.box(gold, x, Y + 3.3, sz + 0.06, 0.18, 0.5, 0.05)
+      B.add(new SphereGeometry(0.11, 12, 8), sconceGlow, trs(x, Y + 3.45, sz - 0.08))
+    }
+    const doorLamp = new PointLight(0xffc890, 8, 6, 1.6)
+    doorLamp.position.set(0, Y + 3.6, ROT.z + ROT.r - 1.4)
+    R.add(doorLamp)
+    // 圆厅地面的金线镶嵌
+    for (const [r0, r1] of [[2.2, 2.3], [2.45, 2.5], [6.6, 6.7]] as [number, number][]) {
+      B.add(new RingGeometry(r0, r1, 72), gold, trs(ROT.x, Y + 0.006, ROT.z, -Math.PI / 2, 0, 0), false)
+    }
+    const inlay = std({ color: 0x3a3430, map: TEX.marble(), rough: 0.2, env: 1.2 })
+    B.add(new RingGeometry(2.3, 2.45, 72), inlay, trs(ROT.x, Y + 0.005, ROT.z, -Math.PI / 2, 0, 0), false)
     await yieldFrame()
 
     // ---------- 「最初」厅（西）：错视 ----------
@@ -283,6 +345,8 @@ export class Museum extends World {
     this.col.slab(15, 24, 14, 3, -2, Y, { surface: 'marble', tag: 'corridor' })
     for (const z of [22.3, 25.7]) { B.box(wall, 15, 4, z, 14, 6, 0.4); this.col.slab(15, z, 14, 0.4, Y, 7, { walkable: false }) }
     B.box(wall, 15, 7, 24, 14, 0.4, 3.4)
+    this.wainscot(B, 'x', 22.5, 1, 8.3, 21.9)
+    this.wainscot(B, 'x', 25.5, -1, 8.3, 21.9)
     for (let i = 0; i < 4; i++) {
       const p = new Mesh(new PlaneGeometry(1.0, 0.7), new MeshStandardMaterial({ map: makeTex(`cor${i}`, 64, (u, v) => { const n = fbm(u, v, 4, 3, 400 + i); return [0.3 + n * 0.4, 0.25 + n * 0.3, 0.3 + n * 0.2] }), roughness: 0.8 }))
       p.position.set(10 + i * 3.2, 3.2, 25.48)
@@ -407,6 +471,30 @@ export class Museum extends World {
   private anaDir!: Vector3
   private anaEye!: Vector3
 
+  private tm!: { dado: MeshStandardMaterial; panel: MeshStandardMaterial; gold: MeshStandardMaterial; base: MeshStandardMaterial; cornice: MeshStandardMaterial }
+
+  /** 墙裙（护墙板 + 金色腰线 + 踢脚）与顶部檐口，沿一面墙的内表面铺设。
+   *  axis 'x'：墙沿 x 方向，内表面在 z = f；axis 'z'：墙沿 z 方向，内表面在 x = f。n 是内表面朝向（±1）。 */
+  private wainscot(B: Batcher, axis: 'x' | 'z', f: number, n: 1 | -1, a: number, b: number) {
+    const T = this.tm
+    const len = b - a
+    if (len < 0.3) return
+    const put = (mat: MeshStandardMaterial, along: number, y: number, h: number, depth: number, l: number) => {
+      const off = f + (n * depth) / 2
+      if (axis === 'x') B.box(mat, along, y, off, l, h, depth)
+      else B.box(mat, off, y, along, depth, h, l)
+    }
+    const c = (a + b) / 2
+    put(T.dado, c, Y + 0.6, 1.2, 0.05, len)
+    put(T.gold, c, Y + 1.23, 0.05, 0.1, len)
+    put(T.base, c, Y + 0.09, 0.18, 0.08, len)
+    const np = Math.max(1, Math.round(len / 1.4))
+    const pw = len / np
+    for (let i = 0; i < np; i++) put(T.panel, a + pw * (i + 0.5), Y + 0.68, 0.72, 0.08, pw - 0.28)
+    put(T.cornice, c, 6.84, 0.24, 0.2, len)
+    put(T.gold, c, 6.7, 0.04, 0.07, len)
+  }
+
   /** 方形房间：地面、四墙、天花板，门开在一侧 */
   private room(B: Batcher, floor: MeshStandardMaterial, wall: MeshStandardMaterial, cx: number, cz: number, w: number, d: number, door: 'E' | 'W', doorW = 3) {
     B.box(floor, cx, Y - 0.5, cz, w, 1, d, 0, 3)
@@ -425,6 +513,14 @@ export class Museum extends World {
       B.box(wall, near, 4, cz + s * (doorW / 2 + seg / 2), 0.4, 6, seg)
       this.col.slab(near, cz + s * (doorW / 2 + seg / 2), 0.4, seg, Y, 7, { walkable: false })
     }
+    // 墙裙与檐口
+    const ix0 = cx - w / 2 + 0.2, ix1 = cx + w / 2 - 0.2, iz0 = cz - d / 2 + 0.2, iz1 = cz + d / 2 - 0.2
+    this.wainscot(B, 'x', iz0, 1, ix0, ix1)
+    this.wainscot(B, 'x', iz1, -1, ix0, ix1)
+    const fs = door === 'E' ? 1 : -1
+    this.wainscot(B, 'z', far + fs * 0.2, fs as 1 | -1, iz0, iz1)
+    this.wainscot(B, 'z', near - fs * 0.2, -fs as 1 | -1, iz0, cz - doorW / 2)
+    this.wainscot(B, 'z', near - fs * 0.2, -fs as 1 | -1, cz + doorW / 2, iz1)
   }
 
   /** 展柜：底座 + 可抬起的玻璃罩 + 展品 */
@@ -481,6 +577,9 @@ export class Museum extends World {
         HB.box(gold, s * 5.2, 6.9, z0 + 3 + i * 4.5, 0.9, 0.2, 0.9)
       }
       HB.box(std({ color: 0x3a2418, map: TEX.wood(), rough: 0.6 }), 4.4, Y + 0.45, z0 + 9.5, 0.6, 0.08, 2.4)
+      for (const sd of [-1, 1]) this.wainscot(HB, 'z', sd * 6.8, (-sd) as 1 | -1, z0 + 0.2, z1)
+      this.wainscot(HB, 'x', z0 + 0.2, 1, -6.8, -2.2)
+      this.wainscot(HB, 'x', z0 + 0.2, 1, 2.2, 6.8)
       HB.build(g, mirror ? 'mirrorHallM' : 'mirrorHall')
       // 墙上的反写文字：只有在镜子里才读得正
       const tex = textTexture({ w: 1024, h: 256, bg: '#e2d8c6', mirror: true, lines: [{ text: '车 票 在 镜 子 里', size: 0.3, color: '#3a2a20', y: 0.42 }, { text: 'THE TICKET IS IN THE MIRROR', size: 0.1, color: '#6a5a48', font: MONO, y: 0.78, spacing: 0.2 }] })

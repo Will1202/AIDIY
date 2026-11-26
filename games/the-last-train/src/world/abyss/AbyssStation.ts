@@ -286,7 +286,9 @@ export class AbyssStation extends World {
     await yieldFrame()
 
     // ---------- 配电室（右侧） ----------
-    this.sideRoom(B, darkSteel, 15, DOME.z, 6.5, 8)
+    const painted = std({ color: 0x55666e, map: TEX.grime(), rough: 0.65, metal: 0.15 })
+    const cabinetM = std({ color: 0x405652, map: TEX.grime(), rough: 0.5, metal: 0.3 })
+    this.sideRoom(B, painted, 15, DOME.z, 6.5, 8)
     const panel = new Mesh(boxGeo(0.2, 1.6, 2.2), darkSteel)
     panel.position.set(18.05, Y + 1.4, DOME.z)
     R.add(panel)
@@ -306,13 +308,41 @@ export class AbyssStation extends World {
     this.leverArm.position.set(17.8, Y + 1.25, DOME.z + 0.6)
     this.leverArm.rotation.z = 0.6
     R.add(this.leverArm)
-    const schem = new Mesh(new PlaneGeometry(1.4, 1.0), new MeshStandardMaterial({ map: textTexture({ w: 512, h: 360, bg: '#0a1a22', lines: [{ text: '主电路 · MAIN BUS', size: 0.07, color: '#8fd8ff', font: MONO, y: 0.15 }, { text: '① 装入保险丝 F-07', size: 0.08, color: '#cfefff', y: 0.45 }, { text: '② 拉下主闸', size: 0.08, color: '#cfefff', y: 0.65 }, { text: '备用件存放于更衣室', size: 0.06, color: '#ffb070', y: 0.86 }] }), emissive: 0xffffff, emissiveIntensity: 0.25 }))
+    const schemTex = textTexture({ w: 512, h: 360, bg: '#0a1a22', border: '#2a5a6a', lines: [{ text: '主电路 · MAIN BUS', size: 0.07, color: '#8fd8ff', font: MONO, y: 0.15 }, { text: '① 装入保险丝 F-07', size: 0.08, color: '#cfefff', y: 0.45 }, { text: '② 拉下主闸', size: 0.08, color: '#cfefff', y: 0.65 }, { text: '备用件存放于更衣室', size: 0.06, color: '#ffb070', y: 0.86 }] })
+    const schem = new Mesh(new PlaneGeometry(1.4, 1.0), new MeshStandardMaterial({ map: schemTex, emissiveMap: schemTex, emissive: 0xffffff, emissiveIntensity: 0.7 }))
     schem.position.set(18.04, Y + 2.6, DOME.z)
     schem.rotation.y = -Math.PI / 2
     R.add(schem)
+    // 配电柜、指示灯、线槽、地面警示线
+    const hazardM = std({ map: TEX.hazard(), rough: 0.7 })
+    const ledOff = glowMat(0x3a0806, 1)
+    this.statusLeds = ledOff
+    for (const z of [DOME.z - 3.55, DOME.z + 3.55]) {
+      for (const x of [13.4, 14.5, 15.6, 16.7]) {
+        B.box(cabinetM, x, Y + 1.0, z, 1.0, 2.0, 0.5)
+        B.box(steel, x, Y + 1.0, z + Math.sign(DOME.z - z) * 0.255, 0.9, 1.86, 0.01)
+        for (let k = 0; k < 3; k++) B.box(ledOff, x - 0.3 + k * 0.12, Y + 1.75, z + Math.sign(DOME.z - z) * 0.265, 0.05, 0.05, 0.01)
+        B.box(darkSteel, x + 0.36, Y + 1.0, z + Math.sign(DOME.z - z) * 0.27, 0.04, 0.3, 0.03)
+      }
+      this.col.slab(15.05, z, 4.4, 0.5, Y, Y + 2.0, { walkable: false, tag: 'cabinets' })
+      B.box(darkSteel, 15, Y + 2.95, z, 6.2, 0.08, 0.36)
+      for (let x = 12.4; x < 18; x += 0.9) B.box(rust, x, Y + 3.0, z, 0.05, 0.1, 0.38)
+    }
+    for (const z of [DOME.z - 1.6, DOME.z + 1.6]) B.cyl(rust, 18.0, Y + 1.6, z, 0.06, 3.2, 8)
+    B.box(hazardM, 17.45, Y + 0.006, DOME.z, 0.3, 0.012, 2.6)
+    const warn = new Mesh(new PlaneGeometry(0.7, 0.36), new MeshStandardMaterial({ map: textTexture({ w: 256, h: 128, bg: '#e8c440', lines: [{ text: '⚡ 高压危险', size: 0.3, color: '#1a1a1a', y: 0.4, weight: '700' }, { text: 'HIGH VOLTAGE', size: 0.16, color: '#1a1a1a', font: MONO, y: 0.78 }] }) }))
+    warn.position.set(18.04, Y + 2.35, DOME.z + 2.45)
+    warn.rotation.y = -Math.PI / 2
+    R.add(warn)
 
     // ---------- 被淹的更衣室（左侧） ----------
-    this.sideRoom(B, darkSteel, -15, DOME.z, 6.5, 8, 'wet')
+    const tile = std({ color: 0x6f8f92, map: TEX.tiles(), rough: 0.3, metal: 0.1 })
+    this.sideRoom(B, tile, -15, DOME.z, 6.5, 8, 'wet')
+    // 更衣长凳
+    B.box(std({ color: 0x5a4030, map: TEX.wood(), rough: 0.6 }), -15, Y + 0.45, DOME.z - 2.6, 2.4, 0.07, 0.42)
+    for (const dx of [-1.0, 1.0]) B.box(steel, -15 + dx, Y + 0.22, DOME.z - 2.6, 0.06, 0.44, 0.36)
+    this.col.slab(-15, DOME.z - 2.6, 2.4, 0.42, Y, Y + 0.5, { surface: 'wood', tag: 'bench' })
+    for (let k = 0; k < 4; k++) B.box(steel, -16.4 + k * 0.9, Y + 1.8, DOME.z - 3.84, 0.04, 0.04, 0.14)
     const water = new Mesh(new PlaneGeometry(6, 7.5), std({ color: 0x0a2a36, rough: 0.05, metal: 0.6, env: 2, transparent: true, opacity: 0.85 }))
     water.rotation.x = -Math.PI / 2
     water.position.set(-15, Y + 0.12, DOME.z)
@@ -580,9 +610,17 @@ export class AbyssStation extends World {
     l.position.set(cx, Y + 2.8, cz)
     this.root.add(l)
     this.roomLights.push(l)
+    // 吸顶灯管：断电时暗红，通电后冷白
+    for (const dz of [-1.6, 1.6]) {
+      B.box(this.fixtureM, cx, Y + 3.06, cz + dz, 2.4, 0.08, 0.22)
+      B.box(this.tubeM, cx, Y + 3.0, cz + dz, 2.2, 0.05, 0.1)
+    }
   }
 
   private roomLights: PointLight[] = []
+  private tubeM = glowMat(0xff3a2a, 0.6)
+  private fixtureM = std({ color: 0x9aa6ae, rough: 0.4, metal: 0.6 })
+  private statusLeds!: MeshStandardMaterial
 
   // ---------------- 交互 ----------------
   private buildInteractions() {
@@ -772,7 +810,11 @@ export class AbyssStation extends World {
     }
     const pw = this.power
     this.emergency.intensity = (1 - pw) * (8 + 6 * Math.sin(t * 3))
-    this.roomLights.forEach((l) => { l.color.setHex(pw > 0.5 ? 0xcfe8ff : 0xff3a2a); l.intensity = pw > 0.5 ? 10 : 4 })
+    this.roomLights.forEach((l) => { l.color.setHex(pw > 0.5 ? 0xcfe8ff : 0xff3a2a); l.intensity = pw > 0.5 ? 16 : 5 })
+    this.tubeM.emissive.setHex(pw > 0.5 ? 0xdff0ff : 0xff3a2a)
+    this.tubeM.emissiveIntensity = pw > 0.5 ? 4 : 0.6
+    this.statusLeds.emissive.setHex(pw > 0.5 ? 0x40ff80 : 0x3a0806)
+    this.statusLeds.emissiveIntensity = pw > 0.5 ? 3 : 1
     this.mainLights.forEach((l, i) => (l.intensity = pw > (i + 1) / 3 ? 45 : 0))
     this.lampMats.forEach((m, i) => (m.emissiveIntensity = pw > i / 10 ? 6 : 0))
     this.flood.intensity = pw * 260

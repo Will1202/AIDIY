@@ -8,7 +8,7 @@ import {
   MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, TorusGeometry, Vector3, InstancedMesh,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, glassMat, glowMat, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glassMat, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX } from '../shared/textures'
 import { textTexture, MONO } from '../shared/text'
 import { makeCloudSea, makeSky, windowize } from '../shared/sky'
@@ -46,6 +46,7 @@ export class InvertedCity extends World {
   private crane!: Mesh
   private flipCool = 0
   private sun!: DirectionalLight
+  private darkM = std({ color: 0x1c2224, rough: 0.5, metal: 0.5 })
   private dialLamps: { A: MeshStandardMaterial; B: MeshStandardMaterial } = { A: glowMat(0x204040, 1), B: glowMat(0x204040, 1) }
   private arrivalT = 0
   private firstArrival = false
@@ -163,19 +164,60 @@ export class InvertedCity extends World {
     const tramSign = new Mesh(new PlaneGeometry(1.6, 0.5), new MeshStandardMaterial({ map: textTexture({ w: 512, h: 160, bg: '#0e2a2a', lines: [{ text: '电车 · 上城方向', size: 0.3, color: '#efe8d8', y: 0.4 }, { text: 'TRAM · UPPER CITY', size: 0.14, color: '#8fd8d2', font: MONO, y: 0.78 }] }), side: DoubleSide }))
     tramSign.position.set(-11.5, Y + 2.55, 20.1)
     R.add(tramSign)
-    // 一节停摆的电车（翻倒在站旁，车顶朝下）
+    // 一节停摆的电车（翻倒在站旁，车顶朝下，转向架朝天）
     const tram = new Group()
-    const tb = new Mesh(boxGeo(2.2, 2.4, 6), std({ color: 0x2f6f6c, rough: 0.4, metal: 0.4 }))
-    tram.add(tb)
-    for (let i = 0; i < 4; i++) {
-      const w = new Mesh(new PlaneGeometry(1.0, 0.9), glowMat(0xffb070, 0.25))
-      w.position.set(1.11, -0.1, -2.1 + i * 1.4)
-      w.rotation.y = Math.PI / 2
-      tram.add(w)
+    const TB = new Batcher()
+    const tealBody = std({ color: 0x2f6f6c, rough: 0.4, metal: 0.4 })
+    const cream = std({ color: 0xe9dfc6, rough: 0.5 })
+    const tramWin = glowMat(0xffb070, 0.22)
+    const tramGlass = std({ color: 0x10181a, rough: 0.15, metal: 0.6, env: 1.6 })
+    TB.box(tealBody, 0, 0, 0, 2.2, 2.4, 6)
+    TB.box(cream, 0, -0.42, 0, 2.24, 0.34, 6.02)
+    TB.box(cream, 0, 1.08, 0, 2.24, 0.1, 6.02)
+    TB.box(tealBody, 0, 1.32, 0, 1.3, 0.24, 4.6)
+    TB.box(dark, 0, -1.26, 0, 1.9, 0.14, 5.4)
+    for (const sx of [-1, 1]) {
+      for (let i = 0; i < 4; i++) {
+        const z = -2.1 + i * 1.4
+        if (sx < 0 && i === 1) continue
+        TB.add(new PlaneGeometry(1.0, 0.82), sx > 0 ? tramWin : tramGlass, trs(sx * 1.112, 0.36, z, 0, sx * Math.PI / 2, 0), false)
+        TB.box(cream, sx * 1.1, 0.36, z, 0.05, 0.9, 1.1)
+      }
     }
+    TB.box(dark, -1.105, -0.05, -0.7, 0.04, 2.0, 0.9) // 车门（-x 侧）
+    for (const sz of [-1, 1]) {
+      TB.add(new PlaneGeometry(1.5, 0.8), tramGlass, trs(0, 0.42, sz * 3.012, 0, sz > 0 ? 0 : Math.PI, 0), false)
+      TB.box(dark, 0, -1.0, sz * 3.08, 2.0, 0.22, 0.16)
+      TB.box(dark, 0, 0.98, sz * 3.03, 1.4, 0.24, 0.06)
+      // 转向架与车轮（翻倒后朝天）
+      TB.box(dark, 0, -1.48, sz * 1.9, 1.7, 0.3, 1.9)
+      for (const wx of [-0.86, 0.86]) for (const wz of [-0.6, 0.6]) {
+        TB.add(new CylinderGeometry(0.34, 0.34, 0.12, 18), brass, trs(wx, -1.62, sz * 1.9 + wz, 0, 0, Math.PI / 2))
+      }
+    }
+    TB.build(tram, 'tram')
+    for (const sz of [-1, 1]) {
+      const hl = new Mesh(new SphereGeometry(0.11, 12, 8), glowMat(0xffe0b0, sz > 0 ? 0.0 : 1.4))
+      hl.position.set(0.7, -0.7, sz * 3.04)
+      tram.add(hl)
+    }
+    const dest = new Mesh(new PlaneGeometry(1.3, 0.22), new MeshStandardMaterial({ map: textTexture({ w: 512, h: 88, bg: '#0a1414', lines: [{ text: '7 路 · 上城', size: 0.55, color: '#ffb84a', y: 0.52 }] }) }))
+    dest.position.set(0, 0.98, 3.065)
+    tram.add(dest)
     tram.position.set(-11.5, Y + 1.2, 11.5)
     tram.rotation.set(0, 0.3, Math.PI)
     R.add(tram)
+    // 从车顶掉下来的受电弓，斜躺在地上
+    const panto = new Group()
+    const PB = new Batcher()
+    PB.box(brass, 0, 0, -0.6, 0.05, 0.05, 1.3, 0)
+    PB.boxR(brass, 0, 0.35, -0.3, 0.05, 0.05, 0.9, 0.8, 0, 0)
+    PB.boxR(brass, 0, 0.35, 0.3, 0.05, 0.05, 0.9, -0.8, 0, 0)
+    PB.box(dark, 0, 0.62, 0, 1.4, 0.06, 0.12)
+    PB.build(panto, 'panto')
+    panto.position.set(-8.4, Y + 0.03, 13.6)
+    panto.rotation.set(0, 0.9, 1.35)
+    R.add(panto)
     this.col.box(-11.5, Y + 1.2, 11.5, 2.4, 2.4, 6.2, { yaw: 0.3, tag: 'tram', surface: 'metal' })
     // 城市档案馆
     this.room(B, ivory, 12.5, 22.5, 6.5, 8, Y, 4.2, 'w')
@@ -193,6 +235,42 @@ export class InvertedCity extends World {
     const archLight = new PointLight(0xffc890, 20, 9, 1.6)
     archLight.position.set(12.8, Y + 3.2, 22.5)
     R.add(archLight)
+    // 广场陈设：花坛里的树、路灯、面向倒影池的长椅（都避开了通往桥头、电车站和档案馆的路线）
+    const soil = std({ color: 0x3a2c22, rough: 1 })
+    const bark = std({ color: 0x5a4030, map: TEX.wood(), rough: 0.8 })
+    const leaves = new MeshStandardMaterial({ color: 0x7d8f58, roughness: 0.85, flatShading: true })
+    const blossom = new MeshStandardMaterial({ color: 0xe6b4a4, roughness: 0.8, flatShading: true })
+    const globe = glowMat(0xffd8a0, 3.2)
+    const planters: [number, number, MeshStandardMaterial][] = [[-6.5, 9.5, leaves], [6.5, 9.5, blossom], [6.2, 12.8, leaves], [-5.6, 26.2, blossom]]
+    planters.forEach(([x, z, m], i) => {
+      B.box(ivory, x, Y + 0.3, z, 1.6, 0.6, 1.6)
+      B.box(brass, x, Y + 0.62, z, 1.66, 0.04, 1.66)
+      B.box(soil, x, Y + 0.58, z, 1.4, 0.04, 1.4)
+      B.cyl(bark, x, Y + 1.7, z, 0.12, 2.3, 8, 0.07)
+      for (let k = 0; k < 3; k++) {
+        const a = k * 2.1 + i
+        const r = 0.75 + ((k + i) % 3) * 0.18
+        B.add(new IcosahedronGeometry(r, 1), m, trs(x + Math.cos(a) * 0.45, Y + 2.9 + k * 0.32, z + Math.sin(a) * 0.45, a, a * 0.7, 0))
+      }
+      this.col.slab(x, z, 1.6, 1.6, Y, Y + 0.62, { walkable: false, tag: 'planter' })
+    })
+    for (const [x, z] of [[-4.5, 8.5], [4.5, 8.5], [4.5, 21.5], [-4.5, 20.5]] as [number, number][]) {
+      B.cyl(dark, x, Y + 0.15, z, 0.2, 0.3, 12)
+      B.cyl(brass, x, Y + 1.9, z, 0.06, 3.6, 8)
+      B.box(brass, x, Y + 3.62, z, 0.9, 0.05, 0.05)
+      for (const dx of [-0.42, 0.42]) {
+        B.add(new SphereGeometry(0.17, 14, 10), globe, trs(x + dx, Y + 3.42, z))
+        B.cyl(brass, x + dx, Y + 3.6, z, 0.1, 0.06, 10)
+      }
+      this.col.cyl(x, z, 0.2, Y, Y + 3.7, { tag: 'lamp' })
+    }
+    for (const sx of [-1, 1]) {
+      const x = sx * 5.3
+      B.box(std({ color: 0x6a4a30, map: TEX.wood(), rough: 0.6 }), x, Y + 0.46, 15, 0.5, 0.06, 1.9)
+      B.box(std({ color: 0x6a4a30, map: TEX.wood(), rough: 0.6 }), x + sx * 0.24, Y + 0.8, 15, 0.06, 0.5, 1.9)
+      for (const dz of [-0.8, 0.8]) B.box(dark, x, Y + 0.22, 15 + dz, 0.46, 0.44, 0.08)
+      this.col.slab(x, 15, 0.56, 1.9, Y, Y + 0.5, { surface: 'wood', tag: 'bench' })
+    }
     // 广场周围的塔楼（装饰 + 碰撞）
     const towers: [number, number, number, number, number, MeshStandardMaterial][] = [
       [-24, 12, 7, 7, 26, towerA], [-23, 26, 6, 8, 38, towerC], [24, 11, 7, 6, 30, towerA], [24, 27, 8, 8, 44, towerB],
@@ -473,6 +551,10 @@ export class InvertedCity extends World {
   private controlPillar(B: Batcher, brass: MeshStandardMaterial, teal: MeshStandardMaterial, p: Vector3, g: 1 | -1, lamp: MeshStandardMaterial) {
     B.box(teal, p.x, p.y + g * 0.55, p.z, 0.7, 1.1, 0.7)
     B.box(brass, p.x, p.y + g * 1.12, p.z, 0.8, 0.06, 0.8)
+    B.box(this.darkM, p.x, p.y + g * 0.07, p.z, 0.86, 0.14, 0.86)
+    for (const cx of [-0.34, 0.34]) for (const cz of [-0.34, 0.34]) B.box(brass, p.x + cx, p.y + g * 0.6, p.z + cz, 0.05, 1.0, 0.05)
+    B.add(new CylinderGeometry(0.16, 0.5, 0.16, 4), brass, trs(p.x, p.y + g * 1.23, p.z, g > 0 ? 0 : Math.PI, Math.PI / 4, 0))
+    B.box(this.darkM, p.x - 0.352, p.y + g * 0.85, p.z, 0.02, 0.56, 0.56)
     this.col.slab(p.x, p.z, 0.8, 0.8, Math.min(p.y, p.y + g * 1.15), Math.max(p.y, p.y + g * 1.15), { tag: 'pillar', walkable: false })
     const dial = new Mesh(new CylinderGeometry(0.22, 0.22, 0.05, 32), lamp)
     dial.position.set(p.x - 0.36, p.y + g * 0.85, p.z)

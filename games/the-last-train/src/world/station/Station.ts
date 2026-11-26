@@ -14,6 +14,7 @@ import { Rain } from '../shared/Rain'
 import { PlanarReflection } from '../shared/Reflection'
 import { makeWet, type WetUniforms } from '../shared/wet'
 import { S } from '../../state/store'
+import { setUI } from '../../state/ui'
 import { FLOOR_Y, Train } from '../shared/Train'
 import { bridges, type RadioBridge } from '../../systems/bridges'
 import { RADIO_SECRET } from '../../content/archives'
@@ -1044,6 +1045,11 @@ export class Station extends World {
     S.set('station.introDone')
     g.moment('rain')
     g.say('', '你在长椅上醒来。雨很大。手边好像放着什么。', 4)
+    if (!S.is('station.controlsShown')) {
+      S.set('station.controlsShown')
+      setUI({ controlsCard: true })
+      setTimeout(() => setUI({ controlsCard: false }), 9000)
+    }
     g.refresh()
   }
 }

@@ -65,6 +65,8 @@ export interface UIState {
   hint: string | null
   /** 章节标题卡 */
   chapterCard: { index: number; name: string; en: string } | null
+  /** 开场后的操作说明卡 */
+  controlsCard: boolean
   touch: boolean
   pointerLocked: boolean
   /** 移动端：是否显示虚拟按键 */
@@ -77,7 +79,7 @@ export const uiStore = createStore<UIState>(() => ({
   screen: 'boot', menuPanel: null, pauseTab: 'journal', hasSave: false, loadingText: '', prompt: null, promptAt: null, toasts: [], subtitles: [],
   dialogue: null, reading: null, inspecting: null, keypad: null, sonar: false, radio: false, manipulate: null, cinema: false, photo: false,
   letterbox: false, fps: 0, world: 'station', ending: null, endingLines: [], showcase: null, timeHud: null, hint: null, chapterCard: null,
-  touch: false, pointerLocked: false, saveFlash: 0, cutscene: false,
+  touch: false, pointerLocked: false, saveFlash: 0, cutscene: false, controlsCard: false,
 }))
 
 export const useUI = <T,>(sel: (s: UIState) => T) => useStore(uiStore, sel)

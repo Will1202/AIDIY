@@ -163,6 +163,26 @@ export const TEX = {
     const m = Math.min(fx / 0.04, (1 - fx) / 0.04, fy / 0.08, (1 - fy) / 0.08, 1)
     return m * 0.8 + fbm(u, v, 32, 2, 153) * 0.2
   }, 2.5),
+  /** 博物馆的灰泥墙：非常轻的起伏，不脏 */
+  plaster: (size = 256) => makeTex(`plaster${size}`, size, (u, v) => {
+    const n = fbm(u, v, 6, 4, 161)
+    const k = 0.9 + (n - 0.5) * 0.06
+    return [k, k * 0.985, k * 0.96]
+  }),
+  /** 条纹帆布（帐篷） */
+  canvasStripe: (size = 128) => makeTex(`canvasStripe${size}`, size, (u, v, x, y) => {
+    const band = Math.floor(u * 8) % 2
+    const weave = ((x + y) % 3 === 0 ? 0.04 : 0) + (fbm(u, v, 8, 3, 171) - 0.5) * 0.12
+    const base = band ? [0.62, 0.2, 0.14] : [0.86, 0.76, 0.56]
+    const edge = Math.abs((u * 8) % 1 - 0.5) > 0.46 ? 0.75 : 1
+    return [base[0] * edge + weave, base[1] * edge + weave, base[2] * edge + weave]
+  }),
+  /** 黄黑警示斜纹 */
+  hazard: (size = 128) => makeTex(`hazard${size}`, size, (u, v) => {
+    const k = Math.floor((u + v) * 6) % 2
+    const n = fbm(u, v, 8, 3, 181) * 0.15
+    return k ? [0.85 - n, 0.65 - n, 0.12] : [0.08 + n * 0.3, 0.08 + n * 0.3, 0.09 + n * 0.3]
+  }),
   /** 木纹 */
   wood: (size = 256) => makeTex(`wood${size}`, size, (u, v) => {
     const n = fbm(u, v, 4, 4, 61)

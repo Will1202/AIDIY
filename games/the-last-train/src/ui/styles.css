@@ -126,6 +126,11 @@ kbd, .k { font-family: var(--mono); font-size: 11px; padding: 2px 7px; border: 1
 .clickToPlay span { font-size: 14px; letter-spacing: 0.3em; color: var(--ivory-dim); padding: 12px 24px; border: 1px solid var(--line); background: rgba(6, 8, 12, 0.5); }
 .skip { position: absolute; right: 34px; bottom: 26px; font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em; color: var(--ivory-faint); }
 
+/* 开场后的操作说明 */
+.controlsCard { position: absolute; left: 50%; bottom: 24vh; transform: translateX(-50%); display: flex; gap: 26px; padding: 14px 26px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 13px; letter-spacing: 0.1em; color: var(--ivory-dim); white-space: nowrap; animation: cardIn 9s ease both; text-shadow: 0 1px 10px #000; pointer-events: none; }
+.controlsCard b { color: var(--ivory); font-weight: 500; }
+.controlsCard kbd { margin-right: 2px; }
+
 /* ---------------- 暂停菜单 ---------------- */
 .pause { position: absolute; inset: 0; display: grid; grid-template-columns: 300px 1fr; background: rgba(5, 7, 11, 0.88); pointer-events: auto; animation: fade 0.35s both; }
 .pause aside { padding: 8vh 0 6vh 48px; display: flex; flex-direction: column; border-right: 1px solid var(--line); }

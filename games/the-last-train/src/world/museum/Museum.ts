@@ -82,7 +82,8 @@ export class Museum extends World {
     const R = this.root
     const B = new Batcher()
     const marble = std({ color: 0xe8e2d8, map: TEX.marble(), rough: 0.18, env: 1.4 })
-    const wall = std({ color: 0xd9d0c0, map: TEX.concrete(), rough: 0.85 })
+    const wall = std({ color: 0xece4d4, map: TEX.plaster(), rough: 0.9 })
+    const dado = std({ color: 0x3a2418, map: TEX.wood(), rough: 0.55 })
     const wallDark = std({ color: 0x5a2a28, rough: 0.9 })
     const gold = std({ color: 0xc9a35a, rough: 0.3, metal: 1, map: TEX.brushed() })
     const velvet = std({ color: 0x6a1a1c, rough: 1 })
@@ -176,7 +177,29 @@ export class Museum extends World {
       const isDoor = doorAngles.some((d) => Math.abs(Math.atan2(Math.sin(a - d), Math.cos(a - d))) < 0.19)
       if (isDoor) continue
       B.box(wall, x, 4, z, 1.35, 6, 0.4, -a + Math.PI / 2)
+      // 墙裙与金线
+      const ix = ROT.x + Math.cos(a) * (ROT.r - 0.24), iz = ROT.z + Math.sin(a) * (ROT.r - 0.24)
+      B.box(dado, ix, Y + 0.6, iz, 1.36, 1.2, 0.08, -a + Math.PI / 2)
+      B.box(gold, ix, Y + 1.24, iz, 1.36, 0.05, 0.1, -a + Math.PI / 2)
+      B.box(gold, ix, 6.6, iz, 1.36, 0.08, 0.12, -a + Math.PI / 2)
       this.col.box(x, 4, z, 1.35, 6, 0.4, { yaw: -a + Math.PI / 2, walkable: false })
+    }
+    // 圆厅里四幅大画（四个对角方向）
+    for (let i = 0; i < 4; i++) {
+      const a = Math.PI / 4 + i * Math.PI / 2
+      const tex = makeTex(`rotPaint${i}`, 128, (u, v) => {
+        const n = fbm(u, v, 3, 5, 600 + i)
+        const pal = [[0.08, 0.1, 0.18], [0.85, 0.6, 0.35], [0.2, 0.45, 0.55], [0.6, 0.2, 0.18]][i]
+        const sky = v > 0.45 ? 1 : 0
+        const k = n * 0.8 + sky * 0.3
+        return [pal[0] + k * 0.5, pal[1] + k * 0.4, pal[2] + k * 0.35]
+      })
+      const px = ROT.x + Math.cos(a) * (ROT.r - 0.3), pz = ROT.z + Math.sin(a) * (ROT.r - 0.3)
+      const pm = new Mesh(new PlaneGeometry(2.6, 1.8), new MeshStandardMaterial({ map: tex, roughness: 0.7 }))
+      pm.position.set(px, 3.6, pz)
+      pm.lookAt(ROT.x, 3.6, ROT.z)
+      R.add(pm)
+      B.box(gold, px + Math.cos(a) * 0.04, 3.6, pz + Math.sin(a) * 0.04, 2.9, 2.1, 0.06, -a + Math.PI / 2)
     }
     // 穹顶与天光
     const dome = new SphereGeometry(ROT.r, 40, 16, 0, Math.PI * 2, 0, Math.PI / 2)

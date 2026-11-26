@@ -12,6 +12,7 @@ export function HUD() {
   const manip = useUI((s) => s.manipulate)
   const hint = useUI((s) => s.hint)
   const card = useUI((s) => s.chapterCard)
+  const controls = useUI((s) => s.controlsCard)
   const timeHud = useUI((s) => s.timeHud)
   const showFps = useSettings((s) => s.showFps)
   const subSize = useSettings((s) => s.subtitleSize)
@@ -37,6 +38,15 @@ export function HUD() {
       {!photo && <Subtitles />}
       {!hidden && <Toasts />}
       {!hidden && hint && <div className="hint"><b>提示</b>{hint}</div>}
+      {!hidden && controls && (
+        <div className="controlsCard">
+          {touch ? (
+            <><span>左半屏 <b>移动</b></span><span>右半屏拖动 <b>转视角</b></span><span><b>交互</b> 按钮</span><span>右上角 <b>暂停</b></span></>
+          ) : (
+            <><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span><span>鼠标 视角</span><span><kbd>E</kbd> 检查 / 交互</span><span><kbd>Tab</kbd> 背包</span><span><kbd>H</kbd> 提示</span><span><kbd>Esc</kbd> 暂停</span></>
+          )}
+        </div>
+      )}
       {!photo && card && (
         <div className="chapterCard" key={card.name}>
           <div className="no">CHAPTER {String(card.index).padStart(2, '0')}</div>

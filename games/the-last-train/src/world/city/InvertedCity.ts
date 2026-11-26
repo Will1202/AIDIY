@@ -519,7 +519,9 @@ export class InvertedCity extends World {
       SB.box(brass, s * (d.halfW - 0.06), d.thick / 2 + 1.05, 0, 0.06, 0.06, d.halfL * 2)
       for (let i = 0; i <= 8; i++) SB.box(brass, s * (d.halfW - 0.06), d.thick / 2 + 0.52, -d.halfL + i * (d.halfL / 4), 0.05, 1.04, 0.05)
     }
-    for (const s of [-1, 1]) SB.box(dark, 0, -d.thick / 2 - d.finH / 2, s * (d.halfL - 0.2), d.halfW * 2, d.finH, 0.4)
+    // 鳍板涂黄黑警示斜纹：一眼看出“这一面不能走”
+    const hazard = std({ color: 0xffffff, map: TEX.hazard(), rough: 0.6, metal: 0.2 })
+    for (const s of [-1, 1]) SB.box(hazard, 0, -d.thick / 2 - d.finH / 2, s * (d.halfL - 0.2), d.halfW * 2, d.finH, 0.4, 0, 0.8)
     // 桁架：斜撑
     for (let i = 0; i < 6; i++) {
       const z = -d.halfL + 1 + i * ((d.halfL * 2 - 2) / 5)

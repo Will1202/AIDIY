@@ -96,8 +96,8 @@ export class FrozenHour extends World {
     const sandstone = std({ color: 0xd8b48a, map: TEX.stone(), normalMap: TEX.stoneNormal(), rough: 0.85 })
     const sandM = std({ color: 0xe8c49a, map: TEX.sand(), normalMap: TEX.sandNormal(), rough: 0.95, normalScale: 0.8 })
     const gold = std({ color: 0xd8a84a, rough: 0.3, metal: 1, map: TEX.brushed() })
-    const cloth = std({ color: 0x8a3a2a, rough: 0.9, side: DoubleSide })
-    const cloth2 = std({ color: 0xd8c8a0, rough: 0.9, side: DoubleSide })
+    const cloth = std({ color: 0xffffff, map: TEX.canvasStripe(), rough: 0.92, side: DoubleSide })
+    const cloth2 = std({ color: 0xe8dcc0, map: TEX.concrete(), rough: 0.95, side: DoubleSide })
     const wood = std({ color: 0x7a5a3a, map: TEX.wood(), rough: 0.7 })
 
     // ---------- 天空 ----------

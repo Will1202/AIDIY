@@ -7,7 +7,7 @@ import {
 import { CollisionWorld, type Collider } from '../../physics/collision'
 import { Batcher, boxGeo, glassMat, glowMat, std, trs } from './kit'
 import { TEX } from './textures'
-import { textTexture, DISPLAY, MONO } from './text'
+import { textTexture, DISPLAY, MONO, LedScreen } from './text'
 import type { QualityPreset } from '../../engine/quality'
 
 export const FLOOR_Y = 1.0
@@ -415,6 +415,56 @@ export class Train {
       g.add(l)
       this.lights.push(l)
     }
+    // ---------- 车厢细节：线路图、告示、地毯、两端的“下一站”屏 ----------
+    const lineTex = textTexture({ w: 2048, h: 96, bg: '#efe6d2', lines: [
+      { text: '零号线 LINE 0　●  午夜车站 ── ●  倒悬都市 ── ●  深海终点站 ── ●  时间沙漠 ── ●  记忆博物馆 ── ○  终点站', size: 0.42, color: '#2a3446', y: 0.52 },
+    ] })
+    const lineMat = new MeshStandardMaterial({ map: lineTex, roughness: 0.6 })
+    for (const side of [-1, 1]) {
+      for (const cx of [-5.6, 5.6]) {
+        const strip = new Mesh(new PlaneGeometry(7.2, 0.34), lineMat)
+        strip.position.set(cx, winY1 + 0.28, side * (INNER_Z - 0.005))
+        strip.rotation.y = side > 0 ? Math.PI : 0
+        g.add(strip)
+      }
+    }
+    const notices = [
+      ['请勿在列车行驶中打开车门', 'PLEASE DO NOT OPEN THE DOORS'],
+      ['失物请交列车长', 'LOST PROPERTY · ASK THE CONDUCTOR'],
+      ['本次列车终点站：　　　', 'TERMINUS: ——'],
+      ['准时抵达，是我们的承诺', 'ON TIME, ALWAYS'],
+    ]
+    notices.forEach(([cn, en], i) => {
+      const tex = textTexture({ w: 384, h: 512, bg: ['#24324a', '#5a2a24', '#2a3a2e', '#3a2e22'][i], border: '#c9a35a', grain: 0.06, lines: [
+        { text: '零号线', size: 0.06, color: '#c9a35a', y: 0.12 },
+        { text: cn, size: 0.075, color: '#efe6d2', y: 0.5 },
+        { text: en, size: 0.04, color: '#c9b890', font: MONO, y: 0.62 },
+        { text: '末班 0000 次', size: 0.05, color: '#a89070', y: 0.86 },
+      ] })
+      // 贴在车厢两端的端墙上（车门两侧），面朝车厢
+      const m = new Mesh(new PlaneGeometry(0.42, 0.56), new MeshStandardMaterial({ map: tex, roughness: 0.7 }))
+      const ex = i < 2 ? -1 : 1
+      const z = i % 2 ? 0.95 : -0.95
+      m.position.set(ex * (CAR_HALF - 0.02), FLOOR_Y + 1.75, z)
+      m.rotation.y = ex > 0 ? -Math.PI / 2 : Math.PI / 2
+      g.add(m)
+    })
+    B.box(std({ color: 0x6a1c1c, rough: 0.95, map: TEX.fabric() }), 0, FLOOR_Y + 0.006, 0, CAR_HALF * 2 - 0.6, 0.012, 0.62, 0, 0.5, false)
+    B.box(brass, 0, FLOOR_Y + 0.008, 0.32, CAR_HALF * 2 - 0.6, 0.012, 0.03, 0, 1, false)
+    B.box(brass, 0, FLOOR_Y + 0.008, -0.32, CAR_HALF * 2 - 0.6, 0.012, 0.03, 0, 1, false)
+    this.led = new LedScreen(512, 128)
+    this.led.draw('末班 0000 次', 'NO TERMINUS')
+    const ledMat = new MeshStandardMaterial({ color: 0x000000, emissive: 0xffffff, emissiveMap: this.led.texture, emissiveIntensity: 1.6 })
+    for (const ex of [-1, 1]) {
+      const box = new Mesh(boxGeo(0.06, 0.26, 1.0), dark)
+      box.position.set(ex * (CAR_HALF - 0.02), ROOF_Y - 0.27, 0)
+      g.add(box)
+      const scr = new Mesh(new PlaneGeometry(0.94, 0.22), ledMat)
+      scr.position.set(ex * (CAR_HALF - 0.06), ROOF_Y - 0.27, 0)
+      scr.rotation.y = ex > 0 ? -Math.PI / 2 : Math.PI / 2
+      g.add(scr)
+    }
+
     // 车厢号牌
     const plate = new Mesh(new PlaneGeometry(0.9, 0.3), new MeshStandardMaterial({ map: textTexture({ w: 512, h: 170, bg: '#16100c', border: '#b89254', lines: [{ text: '末班 0000 次', size: 0.34, color: '#e2c48a', y: 0.4 }, { text: 'CAR 01 · NO TERMINUS', size: 0.16, color: '#9c8460', font: MONO, y: 0.75 }] }), roughness: 0.4, metalness: 0.4 }))
     plate.position.set(-CAR_HALF + 0.06, FLOOR_Y + 2.45, 0)
@@ -561,6 +611,12 @@ export class Train {
 
   setDoors(open: boolean) {
     this.doorTarget = open ? 1 : 0
+  }
+
+  private led!: LedScreen
+  /** 车厢两端的“下一站”屏 */
+  setDestination(top: string, bottom: string) {
+    this.led?.draw(top, bottom)
   }
 
   /** 由世界决定的车厢灯光倍率 */

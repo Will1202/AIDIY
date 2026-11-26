@@ -130,3 +130,51 @@ export class DigitScreen {
     this.texture.needsUpdate = true
   }
 }
+
+/** 琥珀色点阵 LED 屏（车厢两端的“下一站”显示） */
+export class LedScreen {
+  readonly texture: Texture
+  private c: HTMLCanvasElement | null = null
+  private g: CanvasRenderingContext2D | null = null
+  private last = ''
+  constructor(readonly w: number, readonly h: number) {
+    if (hasDom()) {
+      this.c = document.createElement('canvas')
+      this.c.width = w
+      this.c.height = h
+      this.g = this.c.getContext('2d')
+      const t = new CanvasTexture(this.c)
+      t.colorSpace = SRGBColorSpace
+      this.texture = t
+    } else {
+      const t = new DataTexture(new Uint8Array([20, 10, 0, 255]), 1, 1)
+      t.needsUpdate = true
+      this.texture = t
+    }
+  }
+  draw(top: string, bottom: string) {
+    const key = top + '|' + bottom
+    if (key === this.last || !this.g || !this.c) return
+    this.last = key
+    const g = this.g, w = this.w, h = this.h
+    g.fillStyle = '#0a0602'
+    g.fillRect(0, 0, w, h)
+    g.textAlign = 'center'
+    g.textBaseline = 'middle'
+    g.shadowColor = '#ffb040'
+    g.shadowBlur = h * 0.08
+    g.fillStyle = '#ffb848'
+    g.font = `600 ${h * 0.34}px ${SANS_CN}`
+    g.fillText(top, w / 2, h * 0.36)
+    g.font = `500 ${h * 0.18}px ${MONO}`
+    g.fillStyle = '#d08a30'
+    g.fillText(bottom, w / 2, h * 0.76)
+    g.shadowBlur = 0
+    // 点阵遮罩
+    g.fillStyle = 'rgba(10,6,2,0.55)'
+    const step = Math.max(3, Math.round(h / 40))
+    for (let y = 0; y < h; y += step) g.fillRect(0, y, w, 1)
+    for (let x = 0; x < w; x += step) g.fillRect(x, 0, 1, h)
+    this.texture.needsUpdate = true
+  }
+}

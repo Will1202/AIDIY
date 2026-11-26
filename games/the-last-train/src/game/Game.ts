@@ -560,6 +560,10 @@ export class Game implements GameApi {
     FRAGMENTS.forEach((f, i) => this.train.setSlot(i, S.is(`console.${f}`) ? ITEMS[f].color : null))
     const idx = route ? ORDER.indexOf(route) : 0
     this.train.dial.rotation.z = -(idx / 6) * Math.PI * 2
+    // 车厢两端的屏：行驶中显示“下一站”，停靠时显示“本站”
+    const moving = this.phase !== 'docked' && this.phase !== 'opening'
+    const show = moving ? this.travelTo : this.world?.id
+    if (show) this.train.setDestination(`${moving ? '下一站' : '本站'} · ${WORLDS[show].name}`, WORLDS[show].en.toUpperCase())
   }
 
   private sit(x: number, z: number, yaw: number) {
@@ -593,6 +597,7 @@ export class Game implements GameApi {
     if (this.conductor.group.parent !== this.train.group) this.conductor.place(this.train.group, 8.7, FLOOR_Y, -0.85, -Math.PI / 2)
     // 下一个世界在车门关闭、出站时就开始构建
     this.nextBuild = this.buildWorld(to).then((w) => (this.next = w))
+    this.syncConsole()
     this.target = null
     setUI({ prompt: null })
   }

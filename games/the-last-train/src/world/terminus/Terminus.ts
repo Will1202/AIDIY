@@ -10,7 +10,7 @@ import {
   MeshStandardMaterial, PlaneGeometry, PointLight, Scene, SphereGeometry, TorusGeometry, Vector2, Vector3,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, glowMat, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glowMat, std, yieldFrame, trs } from '../shared/kit'
 import { TEX, makeTex, fbm } from '../shared/textures'
 import { textTexture, DISPLAY, MONO } from '../shared/text'
 import { makeSky, windowize } from '../shared/sky'
@@ -95,6 +95,7 @@ export class Terminus extends World {
     const brass = std({ color: 0xd2a860, rough: 0.28, metal: 1, map: TEX.brushed() })
     const brick = std({ color: 0xc8a898, map: TEX.brick(), normalMap: TEX.brickNormal(), rough: 0.85 })
     const wood = std({ color: 0x7a5236, map: TEX.wood(), rough: 0.55 })
+    const enamel = std({ color: 0x2a4a3a, rough: 0.35, metal: 0.2 })
 
     this.sky = makeSky({ top: new Color(0.03, 0.05, 0.15), mid: new Color(0.82, 0.46, 0.44), bottom: new Color(0.18, 0.16, 0.28), sun: new Vector3(0.25, -0.16, -1), sunColor: new Color(1.4, 0.8, 0.5), sunSize: 0.025, stars: 1 })
     R.add(this.sky.mesh)
@@ -161,6 +162,9 @@ export class Terminus extends World {
       const lamp = new Mesh(new SphereGeometry(0.11, 12, 8), glowMat(0xffe2b0, 7))
       lamp.position.set(x + 4, 4.6, 5.2)
       R.add(lamp)
+      // 吊杆与搪瓷灯罩
+      B.cyl(iron, x + 4, 5.1, 5.2, 0.015, 0.8, 6)
+      B.cyl(enamel, x + 4, 4.74, 5.2, 0.36, 0.2, 20, 0.09)
     }
     const nameTex = textTexture({ w: 1024, h: 256, bg: '#14202c', border: '#d2a860', lines: [{ text: '终 点 站', size: 0.36, color: '#f3ecd8', y: 0.4 }, { text: 'TERMINUS · THE STATION THAT NEVER WAS', size: 0.11, color: '#d2a860', font: MONO, y: 0.76, spacing: 0.2 }] })
     for (const x of [-20, 20]) {
@@ -178,6 +182,74 @@ export class Terminus extends World {
     newTicket.position.set(12.4, Y + 0.49, 7.55)
     R.add(newTicket)
     this.newTicket = newTicket
+
+    // ---------- 站房立面：门、亮着晨光的窗、时刻表、线路图、行李 ----------
+    // 窗里的晨光：上亮下暗，两侧有窗帘的褶皱，看起来屋里有纵深
+    const morningTex = makeTex('morningWin', 64, (u, v) => {
+      const curtain = Math.max(0, 1 - Math.min(u, 1 - u) / 0.16)
+      const fold = 0.85 + 0.15 * Math.sin(u * 60)
+      const k = (0.35 + v * 0.65) * (1 - curtain * 0.55 * fold)
+      return [k, k * 0.86, k * 0.7]
+    })
+    const morning = glowMat(0xffd8a8, 1.4, morningTex)
+    const frameM = std({ color: 0x3a2a20, map: TEX.wood(), rough: 0.5 })
+    const face = 8.98
+    for (const x of [-26, 0, 26]) {
+      // 双开木门：上半是透光的玻璃，上方一扇扇形气窗
+      B.box(frameM, x, Y + 1.6, face - 0.04, 2.4, 3.2, 0.1)
+      for (const dx of [-0.55, 0.55]) {
+        B.add(new PlaneGeometry(0.8, 1.3), morning, trs(x + dx, Y + 2.25, face - 0.095, 0, Math.PI, 0), false)
+        B.box(frameM, x + dx, Y + 0.85, face - 0.11, 0.8, 1.1, 0.03)
+        B.box(brass, x + dx * 0.25, Y + 1.5, face - 0.14, 0.04, 0.32, 0.04)
+      }
+      B.box(frameM, x, Y + 1.6, face - 0.12, 0.08, 3.1, 0.04)
+      B.add(new PlaneGeometry(2.0, 0.6), morning, trs(x, Y + 3.6, face - 0.05, 0, Math.PI, 0), false)
+      B.box(stone, x, Y + 4.0, face - 0.1, 2.9, 0.22, 0.2)
+      B.box(stone, x, Y + 0.03, face - 0.35, 2.8, 0.06, 0.7)
+    }
+    for (const x of [-34, -18, 18, 34]) {
+      B.add(new PlaneGeometry(2.6, 2.0), morning, trs(x, Y + 2.2, face - 0.02, 0, Math.PI, 0), false)
+      B.box(iron, x, Y + 2.2, face - 0.06, 2.8, 0.1, 0.06)
+      B.box(iron, x, Y + 3.24, face - 0.06, 2.8, 0.08, 0.06)
+      B.box(iron, x, Y + 1.16, face - 0.06, 2.8, 0.08, 0.06)
+      for (const dx of [-1.36, -0.45, 0.45, 1.36]) B.box(iron, x + dx, Y + 2.2, face - 0.06, 0.06, 2.1, 0.06)
+      B.box(stone, x, Y + 1.08, face - 0.15, 3.0, 0.1, 0.3)
+    }
+    // 时刻表：零号线每一站的发车时间，最后一行没有时间
+    const ttTex = textTexture({ w: 768, h: 512, bg: '#1a2430', border: '#d2a860', lines: [
+      { text: '零号线 · 末班车时刻表', size: 0.075, color: '#f3ecd8', y: 0.1 },
+      { text: 'LINE 0 · LAST SERVICE', size: 0.04, color: '#d2a860', font: MONO, y: 0.18, spacing: 0.2 },
+      { text: '午夜车站', size: 0.055, color: '#e8e0d0', y: 0.31, align: 'left', x: 0.1 }, { text: '00:00', size: 0.055, color: '#ffc870', font: MONO, y: 0.31, align: 'right', x: 0.9 },
+      { text: '倒悬都市', size: 0.055, color: '#e8e0d0', y: 0.42, align: 'left', x: 0.1 }, { text: '00:00', size: 0.055, color: '#ffc870', font: MONO, y: 0.42, align: 'right', x: 0.9 },
+      { text: '深海终点站', size: 0.055, color: '#e8e0d0', y: 0.53, align: 'left', x: 0.1 }, { text: '00:00', size: 0.055, color: '#ffc870', font: MONO, y: 0.53, align: 'right', x: 0.9 },
+      { text: '时间沙漠', size: 0.055, color: '#e8e0d0', y: 0.64, align: 'left', x: 0.1 }, { text: '23:59', size: 0.055, color: '#ffc870', font: MONO, y: 0.64, align: 'right', x: 0.9 },
+      { text: '记忆博物馆', size: 0.055, color: '#e8e0d0', y: 0.75, align: 'left', x: 0.1 }, { text: '00:00', size: 0.055, color: '#ffc870', font: MONO, y: 0.75, align: 'right', x: 0.9 },
+      { text: '不存在的终点', size: 0.055, color: '#e8e0d0', y: 0.86, align: 'left', x: 0.1 }, { text: '--:--', size: 0.055, color: '#8a8478', font: MONO, y: 0.86, align: 'right', x: 0.9 },
+    ] })
+    const tt = new Mesh(new PlaneGeometry(2.4, 1.6), new MeshStandardMaterial({ map: ttTex, emissive: 0xffffff, emissiveMap: ttTex, emissiveIntensity: 0.25, roughness: 0.5 }))
+    tt.position.set(-9, Y + 2.1, face - 0.03)
+    tt.rotation.y = Math.PI
+    R.add(tt)
+    B.box(brass, -9, Y + 2.1, face - 0.01, 2.56, 1.76, 0.03)
+    // 线路图：一条环线，六个站点
+    const mapTex = textTexture({ w: 768, h: 384, bg: '#efe6d2', border: '#2a3a4a', lines: [
+      { text: '零号线 线路图 · LINE 0', size: 0.07, color: '#2a3a4a', y: 0.12 },
+      { text: '○ 午夜车站 ─ ○ 倒悬都市 ─ ○ 深海终点站', size: 0.07, color: '#3a4a5a', y: 0.45 },
+      { text: '○ 时间沙漠 ─ ○ 记忆博物馆 ─ ● 不存在的终点', size: 0.07, color: '#3a4a5a', y: 0.64 },
+      { text: '本线为环线 · THIS LINE HAS NO END', size: 0.05, color: '#a0402a', font: MONO, y: 0.86, spacing: 0.1 },
+    ] })
+    const lineMap = new Mesh(new PlaneGeometry(2.4, 1.2), new MeshStandardMaterial({ map: mapTex, roughness: 0.6 }))
+    lineMap.position.set(9, Y + 2.1, face - 0.03)
+    lineMap.rotation.y = Math.PI
+    R.add(lineMap)
+    B.box(iron, 9, Y + 2.1, face - 0.01, 2.52, 1.32, 0.03)
+    // 长椅旁有人留下的行李
+    const leather = std({ color: 0x5a3424, rough: 0.6 })
+    B.box(leather, -14.3, Y + 0.3, 7.95, 0.8, 0.6, 0.28)
+    B.box(leather, -14.25, Y + 0.72, 7.95, 0.62, 0.24, 0.24)
+    B.box(brass, -14.3, Y + 0.64, 7.95, 0.2, 0.04, 0.05)
+    B.box(std({ color: 0x2a3a4a, rough: 0.7 }), -15.05, Y + 0.25, 7.6, 0.45, 0.5, 0.35)
+    this.col.slab(-14.6, 7.8, 1.5, 0.7, Y, Y + 0.85, { walkable: false, tag: 'luggage' })
 
     // ---------- 站台大钟（没有指针） ----------
     B.cyl(iron, CLOCK.x, Y + 2.2, CLOCK.z, 0.18, 4.4, 12)
@@ -227,7 +299,7 @@ export class Terminus extends World {
     const exitTex = textTexture({ w: 512, h: 160, bg: '#1a3a24', lines: [{ text: '出 站', size: 0.42, color: '#e8f2e0', y: 0.42 }, { text: 'EXIT →', size: 0.18, color: '#9ad8a0', font: MONO, y: 0.8 }] })
     const exitSign = new Mesh(new PlaneGeometry(1.6, 0.5), new MeshStandardMaterial({ map: exitTex, emissive: 0xffffff, emissiveMap: exitTex, emissiveIntensity: 0.6, side: DoubleSide }))
     exitSign.position.set(GATE_X, 3.6, 5.6)
-    exitSign.rotation.y = Math.PI / 2
+    exitSign.rotation.y = -Math.PI / 2 // 朝向站台（之前朝着街道，从站台看过去是反字）
     R.add(exitSign)
     // 闸机外：通往晨光里的街道
     B.box(stone, GATE_X + 14, Y - 0.5, 5.6, 28, 1, 7)

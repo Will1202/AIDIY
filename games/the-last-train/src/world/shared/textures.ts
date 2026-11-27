@@ -50,6 +50,18 @@ export function cell(u: number, v: number, n: number, seed = 3) {
   return { d1, d2 }
 }
 
+/** 错缝砌块：返回到砌缝的距离系数 edge（缝上为 0，块内为 1）与块的随机值 h。行偏移不规则，水平方向保证可平铺 */
+function blocks(u: number, v: number, rows: number, cols: number, jx: number, jy: number, seed: number) {
+  const ry = v * rows
+  const row = Math.floor(ry)
+  const rw = ((row % rows) + rows) % rows
+  const rx = u * cols + hash2(rw, 0, seed) * 0.5 + (rw % 2) * 0.5
+  const col = Math.floor(rx)
+  const fx = rx - col, fy = ry - row
+  const edge = Math.min(fx / jx, (1 - fx) / jx, fy / jy, (1 - fy) / jy, 1)
+  return { edge, h: hash2(((col % cols) + cols) % cols, rw, seed + 1), fy }
+}
+
 // ---------- 纹理构建 ----------
 type Px = (u: number, v: number, x: number, y: number) => [number, number, number, number?]
 
@@ -225,6 +237,30 @@ export const TEX = {
     const c = cell(u, v, 6, 111)
     return sat((c.d2 - c.d1) * 8) * 0.6 + fbm(u, v, 16, 3, 113) * 0.4
   }, 3),
+  /** 砂岩砌块（沙漠的钟塔、石柱、祭台）：错缝大块，块内有沉积层理和风化 */
+  ashlar: (size = 256) => makeTex(`ashlar${size}`, size, (u, v) => {
+    const b = blocks(u, v, 6, 3, 0.025, 0.05, 301)
+    const n = fbm(u, v, 8, 4, 302)
+    const strata = Math.sin((v * 6 * 7 + n * 3) * Math.PI) * 0.03
+    const chip = sat((b.edge - 0.15) * 3)
+    const k = (0.64 + b.h * 0.18 + (n - 0.5) * 0.28 + strata) * mix(0.6, 1, chip)
+    return [k * 1.07, k * 0.93, k * 0.78]
+  }),
+  ashlarNormal: (size = 256) => normalFromHeight(`ashlarN${size}`, size, (u, v) => {
+    const b = blocks(u, v, 6, 3, 0.025, 0.05, 301)
+    return sat(b.edge * 1.4) * 0.75 + fbm(u, v, 16, 3, 303) * 0.25
+  }, 2.5),
+  /** 石板地面（站台、广场）：大块方石，细缝，中间被磨得更亮 */
+  flagstone: (size = 256) => makeTex(`flagstone${size}`, size, (u, v) => {
+    const b = blocks(u, v, 3, 3, 0.018, 0.018, 311)
+    const n = fbm(u, v, 6, 4, 312)
+    const k = (0.74 + b.h * 0.16 + (n - 0.5) * 0.2) * mix(0.55, 1, sat(b.edge * 2))
+    return [k * 1.03, k * 0.96, k * 0.86]
+  }),
+  flagstoneNormal: (size = 256) => normalFromHeight(`flagstoneN${size}`, size, (u, v) => {
+    const b = blocks(u, v, 3, 3, 0.018, 0.018, 311)
+    return sat(b.edge * 1.6) * 0.7 + fbm(u, v, 12, 3, 313) * 0.3
+  }, 2),
   /** 锈蚀 / 深海金属 */
   rust: (size = 256) => makeTex(`rust${size}`, size, (u, v) => {
     const n = fbm(u, v, 5, 5, 121)

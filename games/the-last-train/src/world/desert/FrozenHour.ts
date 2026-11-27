@@ -6,10 +6,10 @@
 //          → 下塔、出塔、恢复钟塔时间让它再次倒下成桥 → 回到列车。
 import {
   Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedBufferAttribute, InstancedMesh, Matrix4,
-  Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, Scene, ShaderMaterial, TorusGeometry, Vector2, Vector3, ConeGeometry, IcosahedronGeometry,
+  Mesh, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Quaternion, Scene, ShaderMaterial, SphereGeometry, TorusGeometry, Vector2, Vector3, ConeGeometry, IcosahedronGeometry,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX, fbm } from '../shared/textures'
 import { textTexture, DISPLAY, MONO } from '../shared/text'
 import { makeSky } from '../shared/sky'
@@ -94,6 +94,8 @@ export class FrozenHour extends World {
     const q = this.q
     const B = new Batcher()
     const sandstone = std({ color: 0xd8b48a, map: TEX.stone(), normalMap: TEX.stoneNormal(), rough: 0.85 })
+    const ashlar = std({ color: 0xdcb48a, map: TEX.ashlar(), normalMap: TEX.ashlarNormal(), rough: 0.82 })
+    const flag = std({ color: 0xdcbc94, map: TEX.flagstone(), normalMap: TEX.flagstoneNormal(), rough: 0.78 })
     const sandM = std({ color: 0xe8c49a, map: TEX.sand(), normalMap: TEX.sandNormal(), rough: 0.95, normalScale: 0.8 })
     const gold = std({ color: 0xd8a84a, rough: 0.3, metal: 1, map: TEX.brushed() })
     const cloth = std({ color: 0xffffff, map: TEX.canvasStripe(), rough: 0.92, side: DoubleSide })
@@ -119,7 +121,11 @@ export class FrozenHour extends World {
       const x = dp.getX(i), z = dp.getZ(i)
       let h = heightAt(x, z)
       // 裂谷
-      if (z > 24 && z < 44 && Math.abs(x) < 80) h = Math.min(h, -40)
+      if (z > 24 && z < 44 && Math.abs(x) < 400) {
+        h = Math.min(h, -40)
+        // 网格间距 8 米，直接压低会在裂谷边缘留下拉伸的斜坡；把这一排顶点挪到岩壁背后，让坡面藏在岩壁后面
+        dp.setZ(i, z < 34 ? 23.5 : 44.5)
+      }
       dp.setY(i, h)
     }
     dunes.computeVertexNormals()
@@ -130,13 +136,17 @@ export class FrozenHour extends World {
     R.add(ground)
     // 裂谷两侧岩壁
     for (const [z, s] of [[24, 1], [44, -1]] as [number, number][]) {
-      const wallG = new PlaneGeometry(160, 46, 80, 23)
+      // 裂谷一直延伸到雾里（之前只有 160 米长，两端能看到地形扭成的竖条）
+      const wallG = new PlaneGeometry(800, 46, 200, 23)
       const wp = wallG.getAttribute('position')
       for (let i = 0; i < wp.count; i++) wp.setZ(i, Math.sin(wp.getX(i) * 0.3) * 0.8 + Math.sin(wp.getY(i) * 0.7 + wp.getX(i) * 0.1) * 0.6)
       wallG.computeVertexNormals()
+      // 岩壁的 UV 按真实尺寸铺（之前整面只铺一次，纹理被拉成了木纹似的竖条）
+      const wuv = wallG.getAttribute('uv')
+      for (let i = 0; i < wuv.count; i++) wuv.setXY(i, (wuv.getX(i) * 800) / 7, (wuv.getY(i) * 46) / 7)
       const wall = new Mesh(wallG, sandstone)
       wall.position.set(0, Y - 23, z)
-      wall.rotation.y = s > 0 ? Math.PI : 0
+      wall.rotation.y = s > 0 ? 0 : Math.PI // 两面岩壁都朝向裂谷内侧（之前朝反了，被背面剔除，只看得到拉伸的沙地）
       R.add(wall)
     }
     // 碰撞：营地、广场、站台；四周的空气墙
@@ -150,7 +160,7 @@ export class FrozenHour extends World {
     this.col.slab(0, 64.5, 44, 1, Y, Y + 4, { walkable: false, tag: 'bound' })
     this.col.slab(0, -2.5, 900, 3, -1, 0, { surface: 'stone', tag: 'bed', safe: false })
     // 站台
-    B.box(sandstone, 0, Y - 0.5, 4.3, 64, 1, 5.4, 0, 2)
+    B.box(flag, 0, Y - 0.5, 4.3, 64, 1, 5.4, 0, 3)
     B.box(gold, 0, Y + 0.01, 1.75, 64, 0.02, 0.15, 0, 1, false)
     for (const z of [-0.72, 0.72]) B.box(gold, 0, 0.06, z, 1200, 0.12, 0.08, 0, 4)
     B.box(sandstone, 0, -0.25, 0, 1200, 0.5, 4.2, 0, 3)
@@ -160,6 +170,24 @@ export class FrozenHour extends World {
     R.add(ns)
     B.box(gold, -11.9, Y + 1.2, 6.9, 0.08, 2.4, 0.08)
     B.box(gold, -8.1, Y + 1.2, 6.9, 0.08, 2.4, 0.08)
+    // 站台上的油灯柱与候车长凳
+    const lanternGlow = glowMat(0xffb860, 4)
+    for (const x of [-20, 6, 22]) {
+      B.cyl(wood, x, Y + 1.6, 6.5, 0.07, 3.2, 8)
+      B.box(wood, x + 0.3, Y + 3.1, 6.5, 0.7, 0.06, 0.06)
+      B.box(gold, x + 0.55, Y + 2.78, 6.5, 0.22, 0.32, 0.22)
+      B.add(new SphereGeometry(0.09, 10, 8), lanternGlow, trs(x + 0.55, Y + 2.76, 6.5))
+      this.col.cyl(x, 6.5, 0.1, Y, Y + 3.2)
+    }
+    const lampP = new PointLight(0xffb060, 6, 7, 1.8)
+    lampP.position.set(6.55, Y + 2.7, 6.5)
+    R.add(lampP)
+    for (const x of [-16, 13]) {
+      B.box(wood, x, Y + 0.45, 6.4, 2.0, 0.07, 0.45)
+      B.box(wood, x, Y + 0.85, 6.62, 2.0, 0.4, 0.05)
+      for (const dx of [-0.85, 0.85]) B.box(ashlar, x + dx, Y + 0.21, 6.4, 0.2, 0.42, 0.4)
+      this.col.slab(x, 6.45, 2.0, 0.5, Y, Y + 0.5, { surface: 'wood', tag: 'bench' })
+    }
     await yieldFrame()
 
     // ---------- 驼队营地 ----------
@@ -199,7 +227,7 @@ export class FrozenHour extends World {
       this.col.slab(x, z, s * 0.9, s * 0.9, Y, Y + s * 0.8, { surface: 'wood', tag: 'crate' })
     }
     // 祭台与怀表
-    B.box(sandstone, 0, Y + 0.5, 11, 1.4, 1, 1.0)
+    B.box(ashlar, 0, Y + 0.5, 11, 1.4, 1, 1.0)
     B.box(gold, 0, Y + 1.02, 11, 1.5, 0.05, 1.1)
     this.col.slab(0, 11, 1.4, 1.0, Y, Y + 1.0, { tag: 'altar', walkable: false })
     this.watchMesh = itemModel('watch', '#e6b65c')
@@ -223,17 +251,28 @@ export class FrozenHour extends World {
     await yieldFrame()
 
     // ---------- 广场 ----------
-    B.box(sandstone, 0, Y - 0.3, 54, 44, 0.6, 20, 0, 2)
+    B.box(flag, 0, Y - 0.3, 54, 44, 0.6, 20, 0, 3)
     for (const [x, z] of [[-14, 50], [14, 50], [-14, 60], [14, 60]] as [number, number][]) {
-      B.cyl(sandstone, x, Y + 3, z, 0.7, 6, 12)
+      this.column(B, ashlar, x, z, 5.2)
       B.box(gold, x, Y + 6.1, z, 1.8, 0.2, 1.8)
       this.col.cyl(x, z, 0.75, Y, Y + 6)
+      this.col.slab(x, z, 1.6, 1.6, Y, Y + 0.4, { walkable: false, tag: 'colBase' })
+    }
+    // 营地边缘的断柱与滚落的柱段
+    for (const [x, z, h] of [[24, 18, 2.6], [-22.5, 21, 1.4], [-25, 8, 3.4]] as [number, number, number][]) {
+      this.column(B, ashlar, x, z, h, true)
+      this.col.cyl(x, z, 0.75, Y, Y + 0.6 + h)
+      this.col.slab(x, z, 1.6, 1.6, Y, Y + 0.4, { walkable: false, tag: 'colBase' })
+    }
+    for (const [x, z, yaw] of [[21.6, 20.6, 0.4], [-20.4, 22.8, 1.9]] as [number, number, number][]) {
+      B.add(this.flutedGeo(0.7, 1.3), ashlar, trs(x, Y + 0.62, z, 0, yaw, Math.PI / 2))
+      this.col.box(x, Y + 0.62, z, 1.3, 1.24, 1.24, { yaw, tag: 'drum', walkable: false })
     }
     // 塔基（钟塔立起来时站在这里）
     B.box(gold, 0, Y + 0.02, 49.2, 5.6, 0.04, 5.6)
 
     // ---------- 钟塔（可以倒下 / 立起的时间物体） ----------
-    this.buildSpire(sandstone, gold)
+    this.buildSpire(ashlar, gold)
     R.add(this.spire)
     this.spire.position.copy(HINGE)
     // 碰撞：倒下时是桥（顶面与地面齐平）；立起时是空心的塔
@@ -373,6 +412,38 @@ export class FrozenHour extends World {
   }
 
   private clockLight!: PointLight
+
+  /** 带凹槽的柱身（16 道竖槽），UV 按真实尺寸铺砌块纹理 */
+  private flutedGeo(r: number, h: number) {
+    const g = new CylinderGeometry(r, r, h, 64, 1)
+    const pos = g.getAttribute('position')
+    const uv = g.getAttribute('uv')
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), z = pos.getZ(i)
+      if (Math.hypot(x, z) < 1e-4) continue
+      const k = 1 - 0.07 * Math.pow(Math.max(0, Math.cos(Math.atan2(z, x) * 16)), 0.6)
+      pos.setX(i, x * k)
+      pos.setZ(i, z * k)
+    }
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, (uv.getX(i) * 2 * Math.PI * r) / 1.5, (uv.getY(i) * h) / 1.5)
+    g.computeVertexNormals()
+    return g
+  }
+
+  /** 石柱：方形柱础 + 圆盘 + 凹槽柱身 + 柱头；broken 时柱身上端是参差的断口 */
+  private column(B: Batcher, m: MeshStandardMaterial, x: number, z: number, h: number, broken = false) {
+    B.box(m, x, Y + 0.2, z, 1.6, 0.4, 1.6)
+    B.cyl(m, x, Y + 0.5, z, 0.85, 0.2, 32)
+    B.add(this.flutedGeo(0.7, h), m, trs(x, Y + 0.6 + h / 2, z))
+    if (broken) {
+      for (let i = 0; i < 5; i++) {
+        const a = i * 1.26 + x
+        B.add(new IcosahedronGeometry(0.32, 0), m, trs(x + Math.cos(a) * 0.38, Y + 0.6 + h + 0.05, z + Math.sin(a) * 0.38, a, a * 0.5, 0, 1, 0.5 + (i % 3) * 0.3, 1))
+      }
+    } else {
+      B.cyl(m, x, Y + 0.6 + h + 0.15, z, 0.7, 0.3, 32, 0.92)
+    }
+  }
 
   private buildSpire(stone: MeshStandardMaterial, gold: MeshStandardMaterial) {
     // 塔的局部坐标：铰链在原点，塔身沿 +y 长 26，厚度沿 +z 4.4，x ∈ [-2.2, 2.2]

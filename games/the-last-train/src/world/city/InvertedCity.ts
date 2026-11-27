@@ -236,41 +236,20 @@ export class InvertedCity extends World {
     archLight.position.set(12.8, Y + 3.2, 22.5)
     R.add(archLight)
     // 广场陈设：花坛里的树、路灯、面向倒影池的长椅（都避开了通往桥头、电车站和档案馆的路线）
-    const soil = std({ color: 0x3a2c22, rough: 1 })
-    const bark = std({ color: 0x5a4030, map: TEX.wood(), rough: 0.8 })
-    const leaves = new MeshStandardMaterial({ color: 0x7d8f58, roughness: 0.85, flatShading: true })
-    const blossom = new MeshStandardMaterial({ color: 0xe6b4a4, roughness: 0.8, flatShading: true })
-    const globe = glowMat(0xffd8a0, 3.2)
-    const planters: [number, number, MeshStandardMaterial][] = [[-6.5, 9.5, leaves], [6.5, 9.5, blossom], [6.2, 12.8, leaves], [-5.6, 26.2, blossom]]
-    planters.forEach(([x, z, m], i) => {
-      B.box(ivory, x, Y + 0.3, z, 1.6, 0.6, 1.6)
-      B.box(brass, x, Y + 0.62, z, 1.66, 0.04, 1.66)
-      B.box(soil, x, Y + 0.58, z, 1.4, 0.04, 1.4)
-      B.cyl(bark, x, Y + 1.7, z, 0.12, 2.3, 8, 0.07)
-      for (let k = 0; k < 3; k++) {
-        const a = k * 2.1 + i
-        const r = 0.75 + ((k + i) % 3) * 0.18
-        B.add(new IcosahedronGeometry(r, 1), m, trs(x + Math.cos(a) * 0.45, Y + 2.9 + k * 0.32, z + Math.sin(a) * 0.45, a, a * 0.7, 0))
-      }
-      this.col.slab(x, z, 1.6, 1.6, Y, Y + 0.62, { walkable: false, tag: 'planter' })
-    })
-    for (const [x, z] of [[-4.5, 8.5], [4.5, 8.5], [4.5, 21.5], [-4.5, 20.5]] as [number, number][]) {
-      B.cyl(dark, x, Y + 0.15, z, 0.2, 0.3, 12)
-      B.cyl(brass, x, Y + 1.9, z, 0.06, 3.6, 8)
-      B.box(brass, x, Y + 3.62, z, 0.9, 0.05, 0.05)
-      for (const dx of [-0.42, 0.42]) {
-        B.add(new SphereGeometry(0.17, 14, 10), globe, trs(x + dx, Y + 3.42, z))
-        B.cyl(brass, x + dx, Y + 3.6, z, 0.1, 0.06, 10)
-      }
-      this.col.cyl(x, z, 0.2, Y, Y + 3.7, { tag: 'lamp' })
+    this.props = {
+      ivory, brass, dark,
+      soil: std({ color: 0x3a2c22, rough: 1 }),
+      bark: std({ color: 0x5a4030, map: TEX.wood(), rough: 0.8 }),
+      leaves: new MeshStandardMaterial({ color: 0x7d8f58, roughness: 0.85, flatShading: true }),
+      blossom: new MeshStandardMaterial({ color: 0xe6b4a4, roughness: 0.8, flatShading: true }),
+      globe: glowMat(0xffd8a0, 3.2),
+      seat: std({ color: 0x6a4a30, map: TEX.wood(), rough: 0.6 }),
     }
-    for (const sx of [-1, 1]) {
-      const x = sx * 5.3
-      B.box(std({ color: 0x6a4a30, map: TEX.wood(), rough: 0.6 }), x, Y + 0.46, 15, 0.5, 0.06, 1.9)
-      B.box(std({ color: 0x6a4a30, map: TEX.wood(), rough: 0.6 }), x + sx * 0.24, Y + 0.8, 15, 0.06, 0.5, 1.9)
-      for (const dz of [-0.8, 0.8]) B.box(dark, x, Y + 0.22, 15 + dz, 0.46, 0.44, 0.08)
-      this.col.slab(x, 15, 0.56, 1.9, Y, Y + 0.5, { surface: 'wood', tag: 'bench' })
-    }
+    const P = this.props
+    ;([[-6.5, 9.5, P.leaves], [6.5, 9.5, P.blossom], [6.2, 12.8, P.leaves], [-5.6, 26.2, P.blossom]] as [number, number, MeshStandardMaterial][])
+      .forEach(([x, z, m], i) => this.planterTree(B, x, z, Y, 1, m, i))
+    for (const [x, z] of [[-4.5, 8.5], [4.5, 8.5], [4.5, 21.5], [-4.5, 20.5]] as [number, number][]) this.lampPost(B, x, z, Y, 1)
+    for (const sx of [-1, 1] as const) this.parkBench(B, sx * 5.3, 15, Y, 1, sx)
     // 广场周围的塔楼（装饰 + 碰撞）
     const towers: [number, number, number, number, number, MeshStandardMaterial][] = [
       [-24, 12, 7, 7, 26, towerA], [-23, 26, 6, 8, 38, towerC], [24, 11, 7, 6, 30, towerA], [24, 27, 8, 8, 44, towerB],
@@ -425,6 +404,18 @@ export class InvertedCity extends World {
       UB.box(brass, x, H + 4 - h - 0.6, z, w * 0.6, 1.2, d * 0.6)
       this.island(UB, rock, x, z, w + 5, d + 5, H + 4, 22, true)
     }
+    // 上城广场的陈设：和下城一样的花坛、路灯、长椅，只是全部倒挂在楼板底面
+    this.lampPost(UB, -4.5, 56, H, -1)
+    this.lampPost(UB, 4.5, 56, H, -1)
+    this.lampPost(UB, -4.5, 70, H, -1)
+    this.lampPost(UB, 4.5, 69.5, H, -1)
+    this.planterTree(UB, -5, 59.6, H, -1, P.leaves, 5)
+    this.planterTree(UB, 5, 66, H, -1, P.blossom, 6)
+    this.parkBench(UB, 5.3, 62.6, H, -1, 1)
+    this.parkBench(UB, -5.3, 68, H, -1, -1)
+    for (const [x, z] of [[-5.5, 94], [5.5, 94], [-6.5, 108.5], [6.5, 108.5]] as [number, number][]) this.lampPost(UB, x, z, H, -1)
+    this.planterTree(UB, -7, 101, H, -1, P.blossom, 7)
+    this.planterTree(UB, 7, 101, H, -1, P.leaves, 8)
     UB.build(U, 'upper')
     await yieldFrame()
 
@@ -489,6 +480,48 @@ export class InvertedCity extends World {
   }
 
   // ---------------- 建造辅助 ----------------
+  private props!: {
+    ivory: MeshStandardMaterial; brass: MeshStandardMaterial; dark: MeshStandardMaterial; soil: MeshStandardMaterial; bark: MeshStandardMaterial
+    leaves: MeshStandardMaterial; blossom: MeshStandardMaterial; globe: MeshStandardMaterial; seat: MeshStandardMaterial
+  }
+
+  /** 花坛与树。y 是地面高度，g = 1 立在地上，g = -1 倒挂在上城楼板底面 */
+  private planterTree(B: Batcher, x: number, z: number, y: number, g: 1 | -1, m: MeshStandardMaterial, i: number) {
+    const P = this.props
+    B.box(P.ivory, x, y + g * 0.3, z, 1.6, 0.6, 1.6)
+    B.box(P.brass, x, y + g * 0.62, z, 1.66, 0.04, 1.66)
+    B.box(P.soil, x, y + g * 0.58, z, 1.4, 0.04, 1.4)
+    B.cyl(P.bark, x, y + g * 1.7, z, g > 0 ? 0.12 : 0.07, 2.3, 8, g > 0 ? 0.07 : 0.12)
+    for (let k = 0; k < 3; k++) {
+      const a = k * 2.1 + i
+      const r = 0.75 + ((k + i) % 3) * 0.18
+      B.add(new IcosahedronGeometry(r, 1), m, trs(x + Math.cos(a) * 0.45, y + g * (2.9 + k * 0.32), z + Math.sin(a) * 0.45, a, a * 0.7, 0))
+    }
+    this.col.slab(x, z, 1.6, 1.6, Math.min(y, y + g * 0.62), Math.max(y, y + g * 0.62), { walkable: false, tag: 'planter' })
+  }
+
+  /** 双头路灯 */
+  private lampPost(B: Batcher, x: number, z: number, y: number, g: 1 | -1) {
+    const P = this.props
+    B.cyl(P.dark, x, y + g * 0.15, z, 0.2, 0.3, 12)
+    B.cyl(P.brass, x, y + g * 1.9, z, 0.06, 3.6, 8)
+    B.box(P.brass, x, y + g * 3.62, z, 0.9, 0.05, 0.05)
+    for (const dx of [-0.42, 0.42]) {
+      B.add(new SphereGeometry(0.17, 14, 10), P.globe, trs(x + dx, y + g * 3.42, z))
+      B.cyl(P.brass, x + dx, y + g * 3.6, z, 0.1, 0.06, 10)
+    }
+    this.col.cyl(x, z, 0.2, Math.min(y, y + g * 3.7), Math.max(y, y + g * 3.7), { tag: 'lamp' })
+  }
+
+  /** 长椅：座面沿 z，靠背在 side 一侧（side = 1 靠背在 +x） */
+  private parkBench(B: Batcher, x: number, z: number, y: number, g: 1 | -1, side: 1 | -1) {
+    const P = this.props
+    B.box(P.seat, x, y + g * 0.46, z, 0.5, 0.06, 1.9)
+    B.box(P.seat, x + side * 0.24, y + g * 0.8, z, 0.06, 0.5, 1.9)
+    for (const dz of [-0.8, 0.8]) B.box(P.dark, x, y + g * 0.22, z + dz, 0.46, 0.44, 0.08)
+    this.col.slab(x, z, 0.56, 1.9, Math.min(y, y + g * 0.5), Math.max(y, y + g * 0.5), { surface: 'wood', tag: 'bench' })
+  }
+
   private rail(B: Batcher, m: MeshStandardMaterial, x: number, z: number, sx: number, sz: number, y: number) {
     B.box(m, x, y + 1.05, z, Math.max(sx, 0.08), 0.06, Math.max(sz, 0.08))
     const len = Math.max(sx, sz)

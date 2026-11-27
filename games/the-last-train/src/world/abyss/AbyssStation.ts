@@ -4,11 +4,10 @@
 //        → 声呐把三组频率调准（看波形 / 听拍音）→ 遗迹入口打开 → 升降梯下到遗迹取得碎片。
 // 标志性时刻：驶入时车厢灯光熄灭，一头巨鲸贴着车窗缓缓游过，照亮周围的水母。
 import {
-  AdditiveBlending, BackSide, Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh,
-  MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, SpotLight, Vector2, Vector3,
+  AdditiveBlending, BackSide, Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, SpotLight, Vector2, Vector3, RingGeometry,
 } from 'three'
 import { World, v3 } from '../World'
-import { Batcher, boxGeo, glassMat, glowMat, std, yieldFrame } from '../shared/kit'
+import { Batcher, boxGeo, glassMat, glowMat, std, yieldFrame, trs } from '../shared/kit'
 import { TEX } from '../shared/textures'
 import { textTexture, MONO } from '../shared/text'
 import { Whale, jellyfish, motes } from '../shared/Whale'
@@ -230,9 +229,29 @@ export class AbyssStation extends World {
     }
     B.cyl(darkSteel, DOME.x, Y + 12.2, DOME.z, 1.6, 0.6, 24)
     // 穹顶地面：中心留出升降梯井
-    const ring = new CylinderGeometry(DOME.r, DOME.r, 0.3, 48)
-    B.add(ring, floorM, new Matrix4().makeTranslation(DOME.x, Y - 0.15, DOME.z))
     const hole = 1.6
+    // 地面是一个圆环（中间是升降梯井口，之前是整块圆盘，坐升降梯下去时抬头会看到井口被地板封住）；UV 按 1.2 米一块砖铺
+    const floorTop = new RingGeometry(hole + 0.1, DOME.r, 72, 3)
+    const fuv = floorTop.getAttribute('uv')
+    for (let i = 0; i < fuv.count; i++) fuv.setXY(i, (fuv.getX(i) * DOME.r * 2) / 1.2, (fuv.getY(i) * DOME.r * 2) / 1.2)
+    B.add(floorTop, floorM, trs(DOME.x, Y, DOME.z, -Math.PI / 2, 0, 0))
+    B.add(new CylinderGeometry(DOME.r, DOME.r, 0.3, 72, 1, true), floorM, new Matrix4().makeTranslation(DOME.x, Y - 0.15, DOME.z))
+    // 地面镶嵌：两道钢圈、井口的警示环、通往走廊 / 侧室 / 控制台的导向灯带（断电暗红，通电后青蓝）
+    for (const [r0, r1] of [[5.95, 6.25], [9.55, 9.7]] as [number, number][]) B.add(new RingGeometry(r0, r1, 72), darkSteel, trs(DOME.x, Y + 0.004, DOME.z, -Math.PI / 2, 0, 0), false)
+    const hz = new RingGeometry(hole + 0.12, hole + 0.5, 48)
+    const huv = hz.getAttribute('uv')
+    for (let i = 0; i < huv.count; i++) huv.setXY(i, huv.getX(i) * 3, huv.getY(i) * 3)
+    B.add(hz, std({ map: TEX.hazard(), rough: 0.6 }), trs(DOME.x, Y + 0.005, DOME.z, -Math.PI / 2, 0, 0), false)
+    const strip = (x0: number, z0: number, x1: number, z1: number) => {
+      const len = Math.hypot(x1 - x0, z1 - z0)
+      B.add(boxGeo(0.07, 0.012, len), this.guideM, trs((x0 + x1) / 2, Y + 0.006, (z0 + z1) / 2, 0, Math.atan2(x1 - x0, z1 - z0), 0), false)
+    }
+    for (const o of [-1.0, 1.0]) {
+      strip(o, DOME.z - DOME.r + 0.3, o, DOME.z - 2.3)
+      strip(o, DOME.z + 2.3, o, DOME.z + 8.6)
+      strip(DOME.x - DOME.r + 0.3, DOME.z + o, DOME.x - 2.3, DOME.z + o)
+      strip(DOME.x + 2.3, DOME.z + o, DOME.x + DOME.r - 0.3, DOME.z + o)
+    }
     const hh = 1.15
     const side = DOME.r - hh
     for (const [x, z, sx, sz] of [[-(hh + side / 2), DOME.z, side, 24], [hh + side / 2, DOME.z, side, 24], [0, DOME.z - hh - side / 2, hh * 2, side], [0, DOME.z + hh + side / 2, hh * 2, side]] as [number, number, number, number][]) {
@@ -619,6 +638,7 @@ export class AbyssStation extends World {
 
   private roomLights: PointLight[] = []
   private tubeM = glowMat(0xff3a2a, 0.6)
+  private guideM = glowMat(0xff2a1a, 0.5)
   private fixtureM = std({ color: 0x9aa6ae, rough: 0.4, metal: 0.6 })
   private statusLeds!: MeshStandardMaterial
 
@@ -813,6 +833,8 @@ export class AbyssStation extends World {
     this.roomLights.forEach((l) => { l.color.setHex(pw > 0.5 ? 0xcfe8ff : 0xff3a2a); l.intensity = pw > 0.5 ? 16 : 5 })
     this.tubeM.emissive.setHex(pw > 0.5 ? 0xdff0ff : 0xff3a2a)
     this.tubeM.emissiveIntensity = pw > 0.5 ? 4 : 0.6
+    this.guideM.emissive.setHex(pw > 0.5 ? 0x4cc9ff : 0xff2a1a)
+    this.guideM.emissiveIntensity = pw > 0.5 ? 2.2 : 0.5
     this.statusLeds.emissive.setHex(pw > 0.5 ? 0x40ff80 : 0x3a0806)
     this.statusLeds.emissiveIntensity = pw > 0.5 ? 3 : 1
     this.mainLights.forEach((l, i) => (l.intensity = pw > (i + 1) / 3 ? 45 : 0))

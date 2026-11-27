@@ -12,7 +12,7 @@ import {
 import { World, v3 } from '../World'
 import { Batcher, boxGeo, glowMat, std, yieldFrame, trs } from '../shared/kit'
 import { TEX, makeTex, fbm } from '../shared/textures'
-import { textTexture, DISPLAY, MONO } from '../shared/text'
+import { textTexture, DISPLAY, MONO, signBoard } from '../shared/text'
 import { makeSky, windowize } from '../shared/sky'
 import { Whale, motes } from '../shared/Whale'
 import { itemModel } from '../shared/itemModels'
@@ -72,7 +72,7 @@ export class Terminus extends World {
 
   envScene() {
     const s = new Scene()
-    const sky = makeSky({ top: new Color(0.1, 0.14, 0.3), mid: new Color(1.4, 0.9, 0.8), bottom: new Color(0.5, 0.45, 0.6), sun: new Vector3(0.3, -0.05, -1), sunColor: new Color(3, 2, 1.4), sunSize: 0.06, radius: 50 })
+    const sky = makeSky({ top: new Color(0.1, 0.14, 0.3), mid: new Color(1.4, 0.9, 0.8), bottom: new Color(0.5, 0.45, 0.6), sun: new Vector3(0.3, -0.05, -1), sunColor: new Color(3, 2, 1.4), sunSize: 0.06, radius: 50, disk: 'wide' })
     s.add(sky.mesh)
     return s
   }
@@ -168,7 +168,7 @@ export class Terminus extends World {
     }
     const nameTex = textTexture({ w: 1024, h: 256, bg: '#14202c', border: '#d2a860', lines: [{ text: '终 点 站', size: 0.36, color: '#f3ecd8', y: 0.4 }, { text: 'TERMINUS · THE STATION THAT NEVER WAS', size: 0.11, color: '#d2a860', font: MONO, y: 0.76, spacing: 0.2 }] })
     for (const x of [-20, 20]) {
-      const n = new Mesh(new PlaneGeometry(3.4, 0.85), new MeshStandardMaterial({ map: nameTex, side: DoubleSide }))
+      const n = signBoard(new MeshStandardMaterial({ map: nameTex }), 3.4, 0.85)
       n.position.set(x, 4.5, 5.6)
       R.add(n)
     }
@@ -297,10 +297,15 @@ export class Terminus extends World {
     }
     this.gateCol = this.col.slab(GATE_X, 5.6, 0.3, 7.0, Y, Y + 3, { tag: 'gate', walkable: false })
     const exitTex = textTexture({ w: 512, h: 160, bg: '#1a3a24', lines: [{ text: '出 站', size: 0.42, color: '#e8f2e0', y: 0.42 }, { text: 'EXIT →', size: 0.18, color: '#9ad8a0', font: MONO, y: 0.8 }] })
-    const exitSign = new Mesh(new PlaneGeometry(1.6, 0.5), new MeshStandardMaterial({ map: exitTex, emissive: 0xffffff, emissiveMap: exitTex, emissiveIntensity: 0.6, side: DoubleSide }))
-    exitSign.position.set(GATE_X, 3.6, 5.6)
-    exitSign.rotation.y = -Math.PI / 2 // 朝向站台（之前朝着街道，从站台看过去是反字）
-    R.add(exitSign)
+    // 两块单面的牌子背靠背：从站台和从街上看都是正字（双面材质从背面看是反字）
+    const exitMat = new MeshStandardMaterial({ map: exitTex, emissive: 0xffffff, emissiveMap: exitTex, emissiveIntensity: 0.6 })
+    for (const sd of [-1, 1]) {
+      const exitSign = new Mesh(new PlaneGeometry(1.6, 0.5), exitMat)
+      exitSign.position.set(GATE_X + sd * 0.03, 3.6, 5.6)
+      exitSign.rotation.y = (sd * Math.PI) / 2
+      R.add(exitSign)
+    }
+    B.box(iron, GATE_X, 3.6, 5.6, 0.04, 0.56, 1.66)
     // 闸机外：通往晨光里的街道
     B.box(stone, GATE_X + 14, Y - 0.5, 5.6, 28, 1, 7)
     this.col.slab(GATE_X + 14, 5.6, 28, 7, -2, Y, { surface: 'stone', tag: 'street' })
@@ -322,10 +327,17 @@ export class Terminus extends World {
       const h = 6 + Math.random() * 14
       B.box(sil, GATE_X + 8 + Math.floor(i / 2) * 7, Y + h / 2, 5.6 + side * (6 + Math.random() * 3), 6, h, 4)
     }
+    // 街灯：灯柱 + 弯臂 + 灯罩（之前只有悬空的发光球）
     for (let i = 0; i < 6; i++) {
-      const lamp = new Mesh(new SphereGeometry(0.1, 8, 6), glowMat(0xffd8a0, 4 - i * 0.5))
-      lamp.position.set(GATE_X + 6 + i * 4, Y + 3.2, i % 2 ? 2.6 : 8.6)
+      const lx = GATE_X + 6 + i * 4, lz = i % 2 ? 2.4 : 8.8
+      const inward = i % 2 ? 1 : -1
+      B.cyl(iron, lx, Y + 1.7, lz, 0.06, 3.4, 8)
+      B.box(iron, lx, Y + 3.38, lz + inward * 0.25, 0.05, 0.05, 0.55)
+      B.cyl(enamel, lx, Y + 3.26, lz + inward * 0.5, 0.22, 0.14, 14, 0.06)
+      const lamp = new Mesh(new SphereGeometry(0.08, 8, 6), glowMat(0xffd8a0, 4 - i * 0.5))
+      lamp.position.set(lx, Y + 3.16, lz + inward * 0.5)
       R.add(lamp)
+      this.col.cyl(lx, lz, 0.1, Y, Y + 3.4)
     }
 
     // ---------- 驾驶室里的帽子 ----------

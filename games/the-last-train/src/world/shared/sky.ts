@@ -10,17 +10,19 @@ export interface SkyOpts {
   sunSize?: number
   stars?: number
   radius?: number
+  /** 'cinematic'（默认）：小而亮的日轮 + 光晕，地平线以下不画日轮；'wide'：旧的大日轮，只用于反射环境图（保持环境光强度不变） */
+  disk?: 'cinematic' | 'wide'
 }
 
 export function makeSky(o: SkyOpts) {
   const mat = new ShaderMaterial({
     uniforms: {
       uTop: { value: o.top }, uMid: { value: o.mid }, uBot: { value: o.bottom }, uSun: { value: (o.sun ?? new Vector3(0, 1, 0)).clone().normalize() },
-      uSunCol: { value: o.sunColor ?? new Color(1, 0.9, 0.7) }, uSunSize: { value: o.sunSize ?? 0.02 }, uStars: { value: o.stars ?? 0 }, uFlip: { value: 0 }, uTime: { value: 0 },
+      uSunCol: { value: o.sunColor ?? new Color(1, 0.9, 0.7) }, uSunSize: { value: o.sunSize ?? 0.02 }, uStars: { value: o.stars ?? 0 }, uFlip: { value: 0 }, uTime: { value: 0 }, uDisk: { value: o.disk === 'wide' ? 0 : 1 },
     },
     vertexShader: `varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
     fragmentShader: /* glsl */ `
-      uniform vec3 uTop, uMid, uBot, uSun, uSunCol; uniform float uSunSize, uStars, uFlip, uTime;
+      uniform vec3 uTop, uMid, uBot, uSun, uSunCol; uniform float uSunSize, uStars, uFlip, uTime, uDisk;
       varying vec3 vP;
       float h(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453); }
       void main(){
@@ -29,7 +31,15 @@ export function makeSky(o: SkyOpts) {
         vec3 col = y > 0.0 ? mix(uMid, uTop, pow(clamp(y, 0.0, 1.0), 0.55)) : mix(uMid, uBot, pow(clamp(-y, 0.0, 1.0), 0.45));
         vec3 sd = normalize(mix(uSun, uSun * vec3(1.0, -1.0, 1.0), uFlip));
         float s = max(dot(d, sd), 0.0);
-        col += uSunCol * (pow(s, 1.0 / max(uSunSize, 1e-4) * 0.05) * 0.6 + smoothstep(1.0 - uSunSize, 1.0 - uSunSize * 0.6, s) * 6.0);
+        // 朝太阳一侧的大范围暖色
+        col += uSunCol * pow(s, 1.0 / max(uSunSize, 1e-4) * 0.05) * 0.6;
+        // 旧日轮角半径有 12°～18°，画面里像一块发光的大圆斑；电影感的日轮约 1.5°～3°，外加一圈光晕，落到地平线以下时只剩光晕
+        float wide = smoothstep(1.0 - uSunSize, 1.0 - uSunSize * 0.6, s) * 6.0;
+        float ang = acos(clamp(dot(d, sd), -1.0, 1.0));
+        float R = uSunSize * 0.9;
+        float above = smoothstep(-0.01, 0.02, y);
+        float disk = smoothstep(R, R * 0.8, ang) * 8.0 * above + exp(-ang / (R * 2.5)) * 1.6 * mix(0.35, 1.0, above);
+        col += uSunCol * mix(wide, disk, uDisk);
         if (uStars > 0.0) {
           vec3 q = floor(d * 380.0);
           float st = step(0.9975, h(q)) * smoothstep(-0.1, 0.4, y);

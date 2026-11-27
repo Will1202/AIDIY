@@ -11,7 +11,7 @@ import {
 import { World, v3 } from '../World'
 import { Batcher, boxGeo, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX, fbm } from '../shared/textures'
-import { textTexture, DISPLAY, MONO } from '../shared/text'
+import { textTexture, DISPLAY, MONO, signBoard } from '../shared/text'
 import { makeSky } from '../shared/sky'
 import { motes } from '../shared/Whale'
 import { itemModel } from '../shared/itemModels'
@@ -84,7 +84,7 @@ export class FrozenHour extends World {
 
   envScene() {
     const s = new Scene()
-    const sky = makeSky({ top: new Color(0.2, 0.15, 0.35), mid: new Color(1.6, 0.9, 0.5), bottom: new Color(0.8, 0.55, 0.4), sun: new Vector3(0.6, 0.12, -0.8), sunColor: new Color(3, 1.8, 0.9), sunSize: 0.05, radius: 50 })
+    const sky = makeSky({ top: new Color(0.2, 0.15, 0.35), mid: new Color(1.6, 0.9, 0.5), bottom: new Color(0.8, 0.55, 0.4), sun: new Vector3(0.6, 0.12, -0.8), sunColor: new Color(3, 1.8, 0.9), sunSize: 0.05, radius: 50, disk: 'wide' })
     s.add(sky.mesh)
     return s
   }
@@ -165,7 +165,7 @@ export class FrozenHour extends World {
     for (const z of [-0.72, 0.72]) B.box(gold, 0, 0.06, z, 1200, 0.12, 0.08, 0, 4)
     B.box(sandstone, 0, -0.25, 0, 1200, 0.5, 4.2, 0, 3)
     const nameTex = textTexture({ w: 1024, h: 200, bg: '#2a1a12', border: '#d8a84a', lines: [{ text: '时 间 沙 漠', size: 0.38, color: '#f3e2c0', y: 0.42 }, { text: 'THE FROZEN HOUR · 23:59:59', size: 0.13, color: '#d8a84a', font: MONO, y: 0.8, spacing: 0.25 }] })
-    const ns = new Mesh(new PlaneGeometry(4, 0.8), new MeshStandardMaterial({ map: nameTex, side: DoubleSide }))
+    const ns = signBoard(new MeshStandardMaterial({ map: nameTex }), 4, 0.8)
     ns.position.set(-10, Y + 2.4, 6.9)
     R.add(ns)
     B.box(gold, -11.9, Y + 1.2, 6.9, 0.08, 2.4, 0.08)
@@ -305,7 +305,7 @@ export class FrozenHour extends World {
     const numerals = ['XII', 'III', 'VI', 'IX', 'I', 'VII', 'X', 'IV']
     numerals.forEach((n, i) => {
       const tex = textTexture({ w: 256, h: 256, lines: [{ text: n, size: 0.5, color: '#e8c070', font: DISPLAY, y: 0.5, weight: '600' }] })
-      const m = new Mesh(new PlaneGeometry(3, 3), new MeshStandardMaterial({ map: tex, transparent: true, side: DoubleSide, emissive: 0xffb050, emissiveMap: tex, emissiveIntensity: 0.6 }))
+      const m = signBoard(new MeshStandardMaterial({ map: tex, transparent: true, emissive: 0xffb050, emissiveMap: tex, emissiveIntensity: 0.6 }), 3, 3, 0.02)
       const a = (i / numerals.length) * Math.PI * 2
       m.position.set(Math.cos(a) * 40, 16 + Math.sin(i * 1.7) * 6, 40 + Math.sin(a) * 30)
       m.rotation.set(Math.sin(i) * 0.5, a, Math.cos(i) * 0.4)

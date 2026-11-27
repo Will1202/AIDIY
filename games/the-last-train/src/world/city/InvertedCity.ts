@@ -10,7 +10,7 @@ import {
 import { World, v3 } from '../World'
 import { Batcher, boxGeo, glassMat, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX } from '../shared/textures'
-import { textTexture, MONO } from '../shared/text'
+import { textTexture, MONO, signBoard } from '../shared/text'
 import { makeCloudSea, makeSky, windowize } from '../shared/sky'
 import { itemModel } from '../shared/itemModels'
 import { segmentBoxes, type SegmentDef } from '../../puzzles/bridge'
@@ -68,7 +68,7 @@ export class InvertedCity extends World {
 
   envScene() {
     const s = new Scene()
-    const sky = makeSky({ top: new Color(0.35, 0.55, 0.7), mid: new Color(1.4, 1.0, 0.75), bottom: new Color(0.9, 0.7, 0.6), sun: new Vector3(-0.8, 0.25, 0.3), sunColor: new Color(3, 2.2, 1.4), sunSize: 0.05, radius: 50 })
+    const sky = makeSky({ top: new Color(0.35, 0.55, 0.7), mid: new Color(1.4, 1.0, 0.75), bottom: new Color(0.9, 0.7, 0.6), sun: new Vector3(-0.8, 0.25, 0.3), sunColor: new Color(3, 2.2, 1.4), sunSize: 0.05, radius: 50, disk: 'wide' })
     s.add(sky.mesh)
     return s
   }
@@ -127,7 +127,7 @@ export class InvertedCity extends World {
     // 站名
     const nameTex = textTexture({ w: 1024, h: 200, bg: '#1d3a3a', border: '#c9a35a', lines: [{ text: '倒 悬 都 市', size: 0.38, color: '#efe8d8', y: 0.42 }, { text: 'THE INVERTED CITY · ELEV 3,400 M', size: 0.13, color: '#c9a35a', font: MONO, y: 0.8, spacing: 0.25 }] })
     for (const x of [-18, 18]) {
-      const n = new Mesh(new PlaneGeometry(4, 0.8), new MeshStandardMaterial({ map: nameTex, roughness: 0.4, side: DoubleSide }))
+      const n = signBoard(new MeshStandardMaterial({ map: nameTex, roughness: 0.4 }), 4, 0.8)
       n.position.set(x, Y + 3.2, 7.35)
       R.add(n)
     }
@@ -161,7 +161,7 @@ export class InvertedCity extends World {
       this.col.cyl(x, z, 0.1, Y, Y + 2.9)
     }
     B.box(ivory, -13.8, Y + 0.45, 22, 0.5, 0.06, 3.0)
-    const tramSign = new Mesh(new PlaneGeometry(1.6, 0.5), new MeshStandardMaterial({ map: textTexture({ w: 512, h: 160, bg: '#0e2a2a', lines: [{ text: '电车 · 上城方向', size: 0.3, color: '#efe8d8', y: 0.4 }, { text: 'TRAM · UPPER CITY', size: 0.14, color: '#8fd8d2', font: MONO, y: 0.78 }] }), side: DoubleSide }))
+    const tramSign = signBoard(new MeshStandardMaterial({ map: textTexture({ w: 512, h: 160, bg: '#0e2a2a', lines: [{ text: '电车 · 上城方向', size: 0.3, color: '#efe8d8', y: 0.4 }, { text: 'TRAM · UPPER CITY', size: 0.14, color: '#8fd8d2', font: MONO, y: 0.78 }] }) }), 1.6, 0.5)
     tramSign.position.set(-11.5, Y + 2.55, 20.1)
     R.add(tramSign)
     // 一节停摆的电车（翻倒在站旁，车顶朝下，转向架朝天）

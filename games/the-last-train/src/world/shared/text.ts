@@ -1,6 +1,6 @@
 // Canvas 文字贴图：站牌、时刻表、告示、展签、倒写的字……
 // Node 测试环境没有 document，这时返回 1×1 的占位纹理，场景结构保持一致。
-import { CanvasTexture, DataTexture, LinearFilter, SRGBColorSpace, type Texture } from 'three'
+import { CanvasTexture, DataTexture, Group, LinearFilter, Mesh, PlaneGeometry, SRGBColorSpace, type Material, type Texture } from 'three'
 
 export const SERIF_CN = '"Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif'
 export const SANS_CN = '"Noto Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif'
@@ -177,4 +177,17 @@ export class LedScreen {
     for (let x = 0; x < w; x += step) g.fillRect(x, 0, 1, h)
     this.texture.needsUpdate = true
   }
+}
+
+/** 背靠背的两块单面牌子：两面看都是正字（双面材质从背面看是镜像的反字）。材质须是单面的 */
+export function signBoard(mat: Material, w: number, h: number, gap = 0.01): Group {
+  const g = new Group()
+  const geo = new PlaneGeometry(w, h)
+  const a = new Mesh(geo, mat)
+  a.position.z = gap / 2
+  const b = new Mesh(geo, mat)
+  b.rotation.y = Math.PI
+  b.position.z = -gap / 2
+  g.add(a, b)
+  return g
 }

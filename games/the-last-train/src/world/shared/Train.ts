@@ -2,11 +2,11 @@
 // 车厢坐标：地板 y = 1.0，内部 x ∈ [-10, 10]，z ∈ [-1.4, 1.4]，车门在 +Z 一侧 x = ±5.5。
 import {
   AdditiveBlending, InstancedMesh, Matrix4, ShaderMaterial, Vector2, BufferGeometry, Float32BufferAttribute, CylinderGeometry, DoubleSide, ExtrudeGeometry, Group, Mesh, MeshStandardMaterial, Object3D, PlaneGeometry,
-  PointLight, Shape, SphereGeometry, SpotLight, type Material,
+  PointLight, Shape, SphereGeometry, SpotLight, TorusGeometry, type Material,
 } from 'three'
 import { CollisionWorld, type Collider } from '../../physics/collision'
 import { Batcher, boxGeo, glassMat, glowMat, std, trs } from './kit'
-import { TEX } from './textures'
+import { TEX, makeTex } from './textures'
 import { textTexture, DISPLAY, MONO, LedScreen } from './text'
 import type { QualityPreset } from '../../engine/quality'
 
@@ -563,12 +563,78 @@ export class Train {
     const deskTop = new Mesh(boxGeo(1.1, 0.05, 2.5), brass)
     deskTop.position.set(16.9, FLOOR_Y + 1.02, 0)
     cab.add(deskTop)
+    // 仪表板：深色面板上一排五块背光仪表（刻度、红区、黄铜表圈、指针），之前是五个浮在半空的发光圆片
+    const panel = new Mesh(boxGeo(0.05, 0.38, 2.2), dark)
+    panel.position.set(16.47, FLOOR_Y + 1.25, 0)
+    cab.add(panel)
+    const dialTex = makeTex('gaugeDial', 128, (u, v) => {
+      const x = u - 0.5, y = v - 0.5
+      const r = Math.hypot(x, y)
+      const deg = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+      const sweep = !(deg > 240 && deg < 300)
+      const near = Math.abs(((deg + 15) % 30) - 15)
+      const tick = sweep && r > 0.34 && r < 0.43 && near < 1.6
+      const red = sweep && r > 0.38 && r < 0.43 && deg > 300 && deg < 360
+      if (r > 0.47) return [0.08, 0.07, 0.06]
+      if (red) return [0.75, 0.12, 0.08]
+      if (tick) return [0.1, 0.08, 0.06]
+      const k = 0.88 - r * 0.25
+      return [k, k * 0.94, k * 0.8]
+    })
+    const bezel = new TorusGeometry(0.092, 0.012, 8, 28)
     for (let i = 0; i < 5; i++) {
-      const gauge = new Mesh(new CylinderGeometry(0.09, 0.09, 0.02, 20), glowMat(i === 2 ? 0xff7040 : 0xffd890, 1.2))
+      const z = -0.8 + i * 0.4
+      const face = std({ color: 0xffffff, map: dialTex, emissive: i === 2 ? 0xff9050 : 0xffd890, emissiveMap: dialTex, emissiveIntensity: 0.55, rough: 0.35 })
+      const gauge = new Mesh(new CylinderGeometry(0.09, 0.09, 0.02, 28), [brass, face, brass])
       gauge.rotation.z = Math.PI / 2
-      gauge.position.set(16.42, FLOOR_Y + 1.25, -0.8 + i * 0.4)
+      gauge.position.set(16.43, FLOOR_Y + 1.25, z)
       cab.add(gauge)
+      const ring = new Mesh(bezel, brass)
+      ring.rotation.y = Math.PI / 2
+      ring.position.set(16.42, FLOOR_Y + 1.25, z)
+      cab.add(ring)
+      const needle = new Mesh(boxGeo(0.004, 0.07, 0.008), std({ color: 0x1a0e08, rough: 0.5 }))
+      needle.geometry.translate(0, 0.03, 0)
+      needle.rotation.x = [0.9, -0.4, 1.6, 0.2, -1.1][i]
+      needle.position.set(16.415, FLOOR_Y + 1.25, z)
+      cab.add(needle)
     }
+    // 驾驶室前墙：像蒸汽机车的锅炉后板——两扇圆形瞭望窗、黄铜管路、阀门手轮、铭牌（之前是一整面空墙）
+    const specGlass = new MeshStandardMaterial({ color: 0x06080c, roughness: 0.05, metalness: 0.9, emissive: 0x4a3048, emissiveIntensity: 0.5, envMapIntensity: 2 })
+    for (const z of [-0.85, 0.85]) {
+      const win = new Mesh(new CylinderGeometry(0.26, 0.26, 0.02, 28), specGlass)
+      win.rotation.z = Math.PI / 2
+      win.position.set(17.59, FLOOR_Y + 2.05, z)
+      cab.add(win)
+      const rim = new Mesh(new TorusGeometry(0.27, 0.035, 8, 32), brass)
+      rim.rotation.y = Math.PI / 2
+      rim.position.set(17.58, FLOOR_Y + 2.05, z)
+      cab.add(rim)
+    }
+    for (const z of [-0.28, 0.28]) {
+      const pipe = new Mesh(new CylinderGeometry(0.035, 0.035, 1.9, 10), brass)
+      pipe.position.set(17.52, FLOOR_Y + 1.5, z)
+      cab.add(pipe)
+      const wheel = new Mesh(new TorusGeometry(0.11, 0.015, 6, 20), std({ color: 0x8a1c14, rough: 0.4 }))
+      wheel.rotation.y = Math.PI / 2
+      wheel.position.set(17.46, FLOOR_Y + 1.85, z)
+      cab.add(wheel)
+      for (const a of [0, Math.PI / 2]) {
+        const spoke = new Mesh(boxGeo(0.01, 0.22, 0.01), std({ color: 0x8a1c14, rough: 0.4 }))
+        spoke.rotation.x = a
+        spoke.position.set(17.46, FLOOR_Y + 1.85, z)
+        cab.add(spoke)
+      }
+    }
+    const hpipe = new Mesh(new CylinderGeometry(0.03, 0.03, 2.6, 10), brass)
+    hpipe.rotation.x = Math.PI / 2
+    hpipe.position.set(17.54, FLOOR_Y + 1.6, 0)
+    cab.add(hpipe)
+    const plateTex = textTexture({ w: 512, h: 160, bg: '#c29a56', border: '#5a3a1a', lines: [{ text: '0000 · 零号线', size: 0.34, color: '#2a1a0a', y: 0.42, weight: '700' }, { text: 'LINE ZERO WORKS · NO. 0', size: 0.14, color: '#4a2a10', font: MONO, y: 0.78 }] })
+    const plate = new Mesh(new PlaneGeometry(0.46, 0.15), new MeshStandardMaterial({ map: plateTex, metalness: 0.6, roughness: 0.35 }))
+    plate.position.set(17.595, FLOOR_Y + 2.2, 0)
+    plate.rotation.y = -Math.PI / 2
+    cab.add(plate)
     const seat = new Mesh(boxGeo(0.6, 0.1, 0.6), std({ color: 0x3a2a22, rough: 0.8 }))
     seat.position.set(15.6, FLOOR_Y + 0.55, 0)
     cab.add(seat)

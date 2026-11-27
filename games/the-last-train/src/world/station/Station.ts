@@ -8,7 +8,7 @@ import {
 } from 'three'
 import { World, v3 } from '../World'
 import { Batcher, boxGeo, glassMat, glowMat, std, trs, yieldFrame } from '../shared/kit'
-import { TEX } from '../shared/textures'
+import { TEX, makeTex } from '../shared/textures'
 import { DigitScreen, textTexture, DISPLAY, MONO } from '../shared/text'
 import { Rain } from '../shared/Rain'
 import { PlanarReflection } from '../shared/Reflection'
@@ -237,7 +237,16 @@ export class Station extends World {
     // 檐板与站名
     B.box(plaster, 0, 7.6, FZ - 0.05, 80, 0.5, 0.2)
     // 候车室窗户（暖光）
-    const winGlow = glowMat(0xffb070, 0.9)
+    // 窗里的夜灯：顶上一盏灯、越往下越暗（屋里的墙裙）、两侧窗帘褶皱（之前是一整块平涂的亮色）
+    const nightWin = makeTex('nightWin', 64, (u, v) => {
+      const lamp = Math.exp(-((u - 0.5) ** 2) * 10 - (v - 0.84) ** 2 * 26)
+      const curtain = Math.max(0, 1 - Math.min(u, 1 - u) / 0.15)
+      const fold = 0.8 + 0.2 * Math.sin(u * 70)
+      const low = 0.7 + 0.3 * Math.min(1, Math.max(0, (v - 0.12) / 0.2))
+      const k = (0.32 + v * 0.38 + lamp * 0.9) * (1 - curtain * 0.6 * fold) * low
+      return [k, k * 0.8, k * 0.58]
+    })
+    const winGlow = glowMat(0xffb070, 1.5, nightWin)
     for (const x of [-19, -10]) {
       const wm = new Mesh(new PlaneGeometry(2.2, 2.4), winGlow)
       wm.position.set(x, 4.2, FZ - 0.01)
@@ -248,7 +257,7 @@ export class Station extends World {
     }
     // 远处二楼的窗（一盏亮，一盏暗）
     for (const [x, on] of [[20, 1], [26, 0.15], [32, 0.6], [-30, 0.25]] as [number, number][]) {
-      const wm = new Mesh(new PlaneGeometry(1.6, 2.0), glowMat(0xffc080, on))
+      const wm = new Mesh(new PlaneGeometry(1.6, 2.0), glowMat(0xffc080, on * 1.5, nightWin))
       wm.position.set(x, 5.2, FZ - 0.01)
       wm.rotation.y = Math.PI
       R.add(wm)

@@ -13,6 +13,7 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const JOBS = [
+  { name: 'intro', setup: `void g.newGame()`, shots: [3, 8, 12, 17, 21, 25, 30, 36] },
   { name: 'ending-leave', setup: `S.give('ticket'); S.set('ticket.punched'); S.set('ticket.final'); S.set('terminus.arrived'); await g.loadWorld('terminus'); g.mode='play'; L.play(); L.tp(34.4, 1, 5.6, -Math.PI/2, 0); await new Promise(r=>setTimeout(r,400)); L.use('gate')`, shots: [1.5, 5, 9, 15] },
   { name: 'ending-conductor', setup: `S.set('terminus.arrived'); S.set('terminus.capOffered'); await g.loadWorld('terminus'); g.mode='play'; L.play(); L.tp(15.0, 1, 0, -Math.PI/2, 0); await new Promise(r=>setTimeout(r,400)); L.use('cap'); L.use('cabLever')`, shots: [2, 7, 12, 18] },
   { name: 'ending-loop', setup: `S.set('terminus.arrived'); S.set('terminus.handsIn'); S.set('terminus.firstIn'); S.set('terminus.clockOk'); for (const a of ['a1','a2','a3','a4']) { S.addArchive(a); S.markRead(a) } await g.loadWorld('terminus'); g.mode='play'; L.play(); L.tp(0, 1, 5.2, Math.PI, 0.3); await new Promise(r=>setTimeout(r,400)); L.use('clockHands')`, shots: [3, 8, 14, 20, 25] },

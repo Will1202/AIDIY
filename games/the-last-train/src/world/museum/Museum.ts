@@ -15,6 +15,7 @@ import { Batcher, boxGeo, glowMat, std, trs, yieldFrame } from '../shared/kit'
 import { TEX, fbm, makeTex } from '../shared/textures'
 import { textTexture, MONO } from '../shared/text'
 import { itemModel } from '../shared/itemModels'
+import { memoryPainting, PAINTING_TITLES } from './paintings'
 import { Conductor } from '../shared/Conductor'
 import { PEDESTALS, MEMORY_ITEMS, pedestalsSolved, anamorphAligned, angleError, pixelText } from '../../puzzles/museum'
 import { S } from '../../state/store'
@@ -121,34 +122,27 @@ export class Museum extends World {
     }
     B.box(wall, 0, 8.6, 1.5, 900, 0.4, 9)
     // 长廊的画（程序化的“其他世界”）
-    const palettes: [number, number, number][][] = [
-      [[0.05, 0.07, 0.12], [0.9, 0.7, 0.35], [0.2, 0.25, 0.4]],
-      [[0.95, 0.65, 0.45], [0.3, 0.55, 0.6], [0.95, 0.9, 0.8]],
-      [[0.01, 0.06, 0.1], [0.3, 0.85, 1.0], [0.08, 0.2, 0.3]],
-      [[0.85, 0.5, 0.25], [0.3, 0.15, 0.3], [1.0, 0.85, 0.5]],
-      [[0.6, 0.15, 0.12], [0.95, 0.9, 0.8], [0.2, 0.1, 0.08]],
-      [[0.1, 0.1, 0.14], [0.95, 0.92, 0.85], [0.6, 0.55, 0.5]],
-    ]
+    // 长廊的八幅画：这趟旅程里的八个地方（雨夜站台、倒悬都市、深海的鲸、落日沙漠、回廊、黎明、隧道、末班车）
     const paintingXs = [-30, -24, -14, -8, 8, 14, 24, 30]
+    // 描金画框：金属度低一些，靠漫反射也能显出金色（纯金属在这里只反射暗色的环境）
+    const frameGold = std({ color: 0xb8913f, rough: 0.42, metal: 0.55, map: TEX.brushed() })
     paintingXs.forEach((x, i) => {
-      const pal = palettes[i % palettes.length]
-      const tex = makeTex(`paint${i}`, 128, (u, v) => {
-        const n = fbm(u, v, 3, 4, 300 + i)
-        const band = Math.sin((v + n * 0.4) * Math.PI * (2 + i % 3))
-        const k = Math.max(0, Math.min(1, n * 1.2 + band * 0.2))
-        const c = k < 0.5 ? pal[0].map((a, j) => a + (pal[2][j] - a) * k * 2) : pal[2].map((a, j) => a + (pal[1][j] - a) * (k - 0.5) * 2)
-        const spot = Math.exp(-((u - 0.3 - i * 0.05) ** 2 + (v - 0.6) ** 2) * 40)
-        return [c[0] + spot * pal[1][0], c[1] + spot * pal[1][1], c[2] + spot * pal[1][2]]
-      })
       const w = 2.4 + (i % 3) * 0.6, h = 1.6 + (i % 2) * 0.5
+      const tex = makeTex(`memPaint${i}`, 192, memoryPainting(i, w / h))
       const p = new Mesh(new PlaneGeometry(w, h), new MeshStandardMaterial({ map: tex, roughness: 0.7 }))
-      p.position.set(x, 3.4, 13.98)
+      // 画面必须在画框前面：画框盒子的正面在 z = 13.97（之前画放在 13.98，被画框整个挡住，长廊里只看得到八块深色板子）
+      p.position.set(x, 3.4, 13.955)
       p.rotation.y = Math.PI
       R.add(p)
-      B.box(gold, x, 3.4, 14.0, w + 0.25, h + 0.25, 0.06)
+      B.box(frameGold, x, 3.4, 14.0, w + 0.25, h + 0.25, 0.06)
       const lamp = new Mesh(boxGeo(0.8, 0.05, 0.1), glowMat(0xffe0b0, 4))
       lamp.position.set(x, 3.4 + h / 2 + 0.35, 13.9)
       R.add(lamp)
+      const label = new Mesh(new PlaneGeometry(0.62, 0.15), new MeshStandardMaterial({ map: textTexture({ w: 320, h: 80, bg: '#e8e0d0', lines: [{ text: PAINTING_TITLES[i], size: 0.36, color: '#2a2018', y: 0.42 }, { text: `NO. ${i + 1}`, size: 0.16, color: '#7a6a58', font: MONO, y: 0.8 }] }), roughness: 0.8 }))
+      // 展签挂在画的右侧（观众视角），底边与画框齐平
+      label.position.set(x - w / 2 - 0.45, 3.4 - h / 2 + 0.12, 13.97)
+      label.rotation.y = Math.PI
+      R.add(label)
     })
     // 镶在画框里的旧车票（失落的车票 #5）
     this.lostFrame = new Mesh(boxGeo(0.4, 0.2, 0.01), std({ color: 0xd8c8a0, rough: 0.8 }))

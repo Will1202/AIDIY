@@ -4,7 +4,7 @@
 //        → 声呐把三组频率调准（看波形 / 听拍音）→ 遗迹入口打开 → 升降梯下到遗迹取得碎片。
 // 标志性时刻：驶入时车厢灯光熄灭，一头巨鲸贴着车窗缓缓游过，照亮周围的水母。
 import {
-  AdditiveBlending, BackSide, Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, SpotLight, Vector2, Vector3, RingGeometry,
+  AdditiveBlending, BackSide, Color, CylinderGeometry, DirectionalLight, DoubleSide, Group, HemisphereLight, InstancedMesh, Matrix4, Mesh, MeshBasicMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, PointLight, Scene, ShaderMaterial, SphereGeometry, SpotLight, Vector2, Vector3, RingGeometry, TorusGeometry, IcosahedronGeometry,
 } from 'three'
 import { World, v3 } from '../World'
 import { Batcher, boxGeo, glassMat, glowMat, std, yieldFrame, trs } from '../shared/kit'
@@ -418,9 +418,56 @@ export class AbyssStation extends World {
     }
     for (let i = 0; i < 4; i++) for (const s of [-1, 1]) {
       const z = rz - 7 + i * 4.6
-      B.cyl(ruinM, s * 6.5, RUIN_Y + 4, z, 0.55, 8, 12)
-      this.col.cyl(s * 6.5, z, 0.6, RUIN_Y, RUIN_Y + 8)
+      // 右侧第二根柱子断了，上半截倒在地上
+      const broken = s > 0 && i === 1
+      const h = broken ? 3.1 : 8
+      B.cyl(ruinM, s * 6.5, RUIN_Y + h / 2, z, 0.55, h, 12)
+      B.box(ruinM, s * 6.5, RUIN_Y + 0.25, z, 1.5, 0.5, 1.5)
+      if (!broken) B.box(ruinM, s * 6.5, RUIN_Y + 7.7, z, 1.4, 0.6, 1.4)
+      this.col.cyl(s * 6.5, z, 0.6, RUIN_Y, RUIN_Y + h)
+      this.col.slab(s * 6.5, z, 1.5, 1.5, RUIN_Y, RUIN_Y + 0.5, { walkable: false, tag: 'colBase' })
     }
+    // 倒下的半截柱子
+    B.add(new CylinderGeometry(0.55, 0.55, 4.4, 12), ruinM, trs(4.3, RUIN_Y + 0.55, rz - 1.6, 0, 0.35, Math.PI / 2))
+    this.col.box(4.3, RUIN_Y + 0.55, rz - 1.6, 4.4, 1.1, 1.1, { yaw: 0.35, tag: 'fallenCol', walkable: false })
+    for (let k = 0; k < 4; k++) B.add(new IcosahedronGeometry(0.28 + k * 0.06, 0), ruinM, trs(6.1 - k * 0.3, RUIN_Y + 0.2, rz - 2.9 + k * 0.7, k, k * 2, 0))
+    // 祭台周围的发光刻环与放射状刻线
+    const groove = glowMat(0x4cc9ff, 1.1)
+    for (const [r0, r1] of [[1.9, 1.96], [2.6, 2.66]] as [number, number][]) {
+      B.add(new RingGeometry(r0, r1, 64), groove, trs(0, RUIN_Y + 0.006, rz + 8, -Math.PI / 2, 0, 0), false)
+    }
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * Math.PI * 2
+      B.add(boxGeo(0.04, 0.01, 0.62), groove, trs(Math.sin(a) * 2.28, RUIN_Y + 0.006, rz + 8 + Math.cos(a) * 2.28, 0, a, 0), false)
+    }
+    // 后墙上的圆形浮雕：像一面没有指针的钟
+    const relief = new Mesh(new TorusGeometry(2.4, 0.16, 10, 64), std({ color: 0x5a6a6a, map: TEX.stone(), rough: 0.9 }))
+    relief.position.set(0, RUIN_Y + 4.6, rz + 10.82)
+    R.add(relief)
+    const reliefGlow = new Mesh(new TorusGeometry(1.9, 0.05, 8, 64), groove)
+    reliefGlow.position.set(0, RUIN_Y + 4.6, rz + 10.86)
+    R.add(reliefGlow)
+    for (let k = 0; k < 12; k++) {
+      const a = (k / 12) * Math.PI * 2
+      B.box(groove, Math.sin(a) * 2.05, RUIN_Y + 4.6 + Math.cos(a) * 2.05, rz + 10.86, 0.08, k % 3 === 0 ? 0.5 : 0.25, 0.04, 0)
+    }
+    // 墙脚与柱脚的发光海葵（一次绘制的实例）
+    const anemoneN = 90
+    // 不受光照的 HDR 颜色（大于 1）配合每个实例的颜色，才能既发光又各有色相
+    const anemone = new InstancedMesh(new SphereGeometry(1, 8, 6), new MeshBasicMaterial({ color: new Color(2.4, 2.4, 2.4) }), anemoneN)
+    const am = new Matrix4()
+    for (let k = 0; k < anemoneN; k++) {
+      const side = k % 3
+      let x: number, z: number
+      if (side === 0) { x = (Math.random() < 0.5 ? -1 : 1) * (8.4 + Math.random() * 0.4); z = rz - 10 + Math.random() * 20 }
+      else if (side === 1) { x = -8 + Math.random() * 16; z = rz + 10.4 + Math.random() * 0.4 }
+      else { const c = Math.floor(Math.random() * 8); x = (c % 2 ? 1 : -1) * 6.5 + (Math.random() - 0.5) * 1.8; z = rz - 7 + Math.floor(c / 2) * 4.6 + (Math.random() - 0.5) * 1.8 }
+      const sc = 0.05 + Math.random() * 0.1
+      am.makeScale(sc, sc * (0.6 + Math.random()), sc).setPosition(x, RUIN_Y + sc * 0.5, z)
+      anemone.setMatrixAt(k, am)
+      anemone.setColorAt(k, new Color().setHSL(Math.random() < 0.6 ? 0.92 : 0.52, 0.8, 0.6))
+    }
+    R.add(anemone)
     // 发光的刻纹
     const glyph = textTexture({ w: 1024, h: 256, bg: '#000000', glow: '#4cc9ff', lines: [{ text: '◯ ━ ◯ ━ ◯　末班车总会来的　◯ ━ ◯ ━ ◯', size: 0.22, color: '#7fe8ff', y: 0.5 }] })
     for (const s of [-1, 1]) {

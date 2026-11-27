@@ -357,10 +357,49 @@ export class Museum extends World {
     this.corridorWall = new Mesh(boxGeo(0.4, 6, 3), wall)
     this.corridorWall.position.set(22.2, 4, 24)
     R.add(this.corridorWall)
-    const recur = new Mesh(new PlaneGeometry(1.6, 1.1), new MeshStandardMaterial({ map: makeTex('recur', 128, (u, v) => { const d = Math.max(Math.abs(u - 0.5), Math.abs(v - 0.5)); const r = Math.floor(d * 12) % 2; return r ? [0.75, 0.7, 0.62] : [0.35, 0.3, 0.26] }), roughness: 0.8 }))
+    // 画里就是这条走廊：一点透视的地面、墙裙、墙面，尽头又是这面墙和这幅画（一层套一层）
+    const corridorPaint = (u: number, v: number): [number, number, number] => {
+      for (let level = 0; level < 4; level++) {
+        const dx = (u - 0.5) * 1.6, dy = (v - 0.5) * 1.1
+        const m = Math.max(Math.abs(dx) / 1.6, Math.abs(dy) / 1.1) * 2
+        if (m < 0.22) {
+          // 尽头的墙：中间挂着同一幅画，再往里递归
+          const pu = (u - 0.5) / 0.22 * 2.4, pv = (v - 0.45) / 0.22 * 2.4
+          if (Math.abs(pu) < 0.5 && Math.abs(pv) < 0.36) {
+            if (Math.abs(pu) > 0.45 || Math.abs(pv) > 0.31) return [0.55, 0.42, 0.2]
+            u = pu + 0.5
+            v = pv / 0.72 + 0.5
+            continue
+          }
+          return [0.8, 0.76, 0.68]
+        }
+        const wall = Math.abs(dx) / 1.6 > Math.abs(dy) / 1.1
+        const depth = 0.22 / m
+        if (wall) {
+          const h = dy / (Math.abs(dx) / 1.6 * 1.1)
+          const k = 0.55 + depth * 0.35
+          if (h < -0.6) return [0.22 * k, 0.14 * k, 0.1 * k]
+          if (h < -0.56) return [0.7 * k, 0.55 * k, 0.25 * k]
+          return [0.86 * k, 0.8 * k, 0.7 * k]
+        }
+        const k = 0.5 + depth * 0.4
+        if (dy < 0) {
+          const line = Math.abs(((1 / m) * 2) % 1 - 0.5) > 0.46
+          return line ? [0.6 * k, 0.58 * k, 0.55 * k] : [0.92 * k, 0.9 * k, 0.86 * k]
+        }
+        return [0.7 * k, 0.66 * k, 0.6 * k]
+      }
+      return [0.5, 0.45, 0.4]
+    }
+    const recur = new Mesh(new PlaneGeometry(1.6, 1.1), new MeshStandardMaterial({ map: makeTex('recurCorridor', 256, corridorPaint), roughness: 0.8 }))
     recur.position.set(-0.21, 0, 0)
     recur.rotation.y = -Math.PI / 2
     this.corridorWall.add(recur)
+    for (const [y, h, z, w] of [[0.6, 0.08, 0, 1.76], [-0.6, 0.08, 0, 1.76], [0, 1.28, 0.84, 0.08], [0, 1.28, -0.84, 0.08]] as [number, number, number, number][]) {
+      const f = new Mesh(boxGeo(0.05, h, w), gold)
+      f.position.set(-0.225, y, z)
+      this.corridorWall.add(f)
+    }
     this.corridorCol = this.col.slab(22.2, 24, 0.4, 3, Y, 7, { tag: 'corridorWall', walkable: false })
     this.corridorDoor = new Group()
     for (const z of [22.4, 25.6]) {

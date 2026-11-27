@@ -578,6 +578,15 @@ export class Museum extends World {
       }
       HB.box(std({ color: 0x3a2418, map: TEX.wood(), rough: 0.6 }), 4.4, Y + 0.45, z0 + 9.5, 0.6, 0.08, 2.4)
       for (const sd of [-1, 1]) this.wainscot(HB, 'z', sd * 6.8, (-sd) as 1 | -1, z0 + 0.2, z1)
+      if (mirror) {
+        // 镜中世界里，对应圆厅入口的门洞后面什么也没有：用一扇关着的门封住（碰撞体本来就是整面墙）
+        HB.box(this.tm.panel, 0, (Y + 5.2) / 2, z0 + 0.02, 4.4, 4.2, 0.1)
+        HB.box(this.tm.dado, 0, (Y + 5.2) / 2, z0 + 0.09, 0.06, 4.2, 0.04)
+        for (const dx of [-1.1, 1.1]) for (const dy of [1.2, 3.1]) HB.box(this.tm.dado, dx, Y + dy, z0 + 0.09, 1.6, 1.5, 0.03)
+        for (const dx of [-0.25, 0.25]) HB.box(this.tm.gold, dx, Y + 2.1, z0 + 0.13, 0.05, 0.4, 0.05)
+        for (const dx of [-2.25, 2.25]) HB.box(this.tm.gold, dx, (Y + 5.2) / 2, z0 + 0.12, 0.12, 4.3, 0.08)
+        HB.box(this.tm.gold, 0, Y + 4.25, z0 + 0.12, 4.62, 0.12, 0.08)
+      }
       this.wainscot(HB, 'x', z0 + 0.2, 1, -6.8, -2.2)
       this.wainscot(HB, 'x', z0 + 0.2, 1, 2.2, 6.8)
       HB.build(g, mirror ? 'mirrorHallM' : 'mirrorHall')

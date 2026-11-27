@@ -1,5 +1,5 @@
 // 背包里每件物品的 3D 模型（物品预览、世界里的摆放共用）
-import { CylinderGeometry, Group, IcosahedronGeometry, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, SphereGeometry, TorusGeometry, type Object3D } from 'three'
+import { CylinderGeometry, Group, IcosahedronGeometry, LatheGeometry, Mesh, MeshPhysicalMaterial, MeshStandardMaterial, SphereGeometry, TorusGeometry, Vector2, type Object3D } from 'three'
 import { boxGeo, glowMat, std } from './kit'
 import type { ItemModel } from '../../content/items'
 import { textTexture } from './text'
@@ -118,9 +118,24 @@ export function itemModel(model: ItemModel, color: string): Object3D {
       break
     }
     case 'umbrella': {
-      const canopy = new Mesh(new SphereGeometry(0.6, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2.4), std({ color: 0xb33a32, rough: 0.6, side: 2 }))
+      // 八片伞面：微微外鼓的八棱伞（之前是一个球冠，侧着放时像一颗红球），伞骨沿棱线，顶上有伞尖
+      const prof = [new Vector2(0.001, 0.34), new Vector2(0.2, 0.3), new Vector2(0.42, 0.18), new Vector2(0.62, 0)]
+      const canopy = new Mesh(new LatheGeometry(prof, 8), std({ color: 0xb33a32, rough: 0.6, side: 2 }))
+      canopy.material.flatShading = true
       canopy.position.y = 0.5
       g.add(canopy)
+      const ribM = std({ color: 0x2a1a18, rough: 0.5 })
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2
+        const rib = new Mesh(new CylinderGeometry(0.008, 0.008, 0.7, 4), ribM)
+        rib.position.set(Math.sin(a) * 0.31, 0.5 + 0.17, Math.cos(a) * 0.31)
+        rib.lookAt(Math.sin(a) * 0.62, 0.5, Math.cos(a) * 0.62)
+        rib.rotateX(Math.PI / 2)
+        g.add(rib)
+      }
+      const tip = new Mesh(new CylinderGeometry(0.008, 0.018, 0.12, 6), ribM)
+      tip.position.y = 0.5 + 0.4
+      g.add(tip)
       const shaft = new Mesh(new CylinderGeometry(0.02, 0.02, 1.3, 8), std({ color: 0x222222, metal: 0.7 }))
       shaft.position.y = 0.2
       g.add(shaft)
